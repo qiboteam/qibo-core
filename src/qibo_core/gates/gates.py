@@ -5,7 +5,6 @@ import numpy as np
 
 from qibo.config import PRECISION_TOL, raise_error
 from qibo.gates.abstract import Gate, ParametrizedGate
-from qibo.parameter import Parameter
 
 
 class H(Gate):
@@ -77,7 +76,8 @@ class X(Gate):
         return gate
 
     def decompose(self, *free, use_toffolis=True):
-        """Decomposes multi-control ``X`` gate to one-qubit, ``CNOT`` and ``TOFFOLI`` gates.
+        """Decomposes multi-control ``X`` gate to one-qubit, ``CNOT`` and
+        ``TOFFOLI`` gates.
 
         Args:
             free: Ids of free qubits to use for the gate decomposition.
@@ -477,7 +477,8 @@ class I(Gate):
 
 
 class Align(Gate):
-    """Aligns proceeding qubit operations and (optionally) waits ``delay`` amount of time.
+    """Aligns proceeding qubit operations and (optionally) waits ``delay``
+    amount of time.
 
     Args:
         *q (int): The qubit ID numbers.
@@ -521,8 +522,6 @@ class _Rn_(ParametrizedGate):
         self.unitary = True
 
         self.initparams = theta
-        if isinstance(theta, Parameter):
-            theta = theta()
 
         if isinstance(theta, (float, int)) and (theta % (np.pi / 2)).is_integer():
             self.clifford = True
@@ -533,9 +532,7 @@ class _Rn_(ParametrizedGate):
 
     def _dagger(self) -> "Gate":
         """"""
-        return self.__class__(
-            self.target_qubits[0], -self.parameters[0]
-        )  # pylint: disable=E1130
+        return self.__class__(self.target_qubits[0], -self.parameters[0])  # pylint: disable=E1130
 
     @Gate.check_controls
     def controlled_by(self, *q):

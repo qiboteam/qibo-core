@@ -1,10 +1,8 @@
 import os
 
-from qibo.backends.abstract import Backend
-from qibo.backends.clifford import CliffordBackend
-from qibo.backends.npmatrices import NumpyMatrices
-from qibo.backends.numpy import NumpyBackend
-from qibo.backends.tensorflow import TensorflowBackend
+from .abstract import Backend
+from .npmatrices import NumpyMatrices
+from .numpy import NumpyBackend
 from qibo.config import log, raise_error
 
 __all__ = [
