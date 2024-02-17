@@ -12,6 +12,19 @@ from .abstract import Gate
 from .gates import I, Unitary, X, Y, Z
 from .special import FusedGate
 
+__all__ = [
+    "Channel",
+    "KrausChannel",
+    "UnitaryChannel",
+    "PauliNoiseChannel",
+    "DepolarizingChannel",
+    "ThermalRelaxationChannel",
+    "AmplitudeDampingChannel",
+    "PhaseDampingChannel",
+    "ReadoutErrorChannel",
+    "ResetChannel",
+]
+
 
 class Channel(Gate):
     """Abstract class for channels."""

@@ -4,8 +4,10 @@ from typing import List, Sequence, Tuple
 
 import sympy
 
-from qibo.backends import _check_backend
-from qibo.config import raise_error
+from qibo_core.backends import _check_backend
+from qibo_core.config import raise_error
+
+__all__ = ["Gate", "SpecialGate", "ParametrizedGate"]
 
 REQUIRED_FIELDS = [
     "name",
@@ -378,7 +380,8 @@ class Gate:
         )
 
     def basis_rotation(self):
-        """Transformation required to rotate the basis for measuring the gate."""
+        """Transformation required to rotate the basis for measuring the
+        gate."""
         raise_error(
             NotImplementedError,
             f"Basis rotation is not implemented for {self.__class__.__name__}",

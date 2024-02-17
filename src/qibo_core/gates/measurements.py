@@ -7,6 +7,8 @@ from qibo.gates.abstract import Gate
 from qibo.gates.gates import Z
 from qibo.measurements import MeasurementResult
 
+__all__ = ["M"]
+
 
 class M(Gate):
     """The measure gate.
@@ -224,8 +226,8 @@ class M(Gate):
 
     # Overload on_qubits to copy also gate.result, controlled by can be removed for measurements
     def on_qubits(self, qubit_map) -> "Gate":
-        """Creates the same measurement gate targeting different qubits
-        and preserving the measurement result register.
+        """Creates the same measurement gate targeting different qubits and
+        preserving the measurement result register.
 
         Args:
             qubit_map (int): Dictionary mapping original qubit indices to new ones.

@@ -1,10 +1,13 @@
-from qibo.backends import _check_backend
-from qibo.gates.abstract import SpecialGate
-from qibo.gates.measurements import M
+from qibo_core.backends import _check_backend
+from .abstract import SpecialGate
+from .measurements import M
+
+__all__ = ["CallbackGate", "FusedGate"]
 
 
 class CallbackGate(SpecialGate):
-    """Calculates a :class:`qibo.callbacks.Callback` at a specific point in the circuit.
+    """Calculates a :class:`qibo.callbacks.Callback` at a specific point in the
+    circuit.
 
     This gate performs the callback calulation without affecting the state vector.
 
@@ -31,7 +34,9 @@ class CallbackGate(SpecialGate):
 
 
 class FusedGate(SpecialGate):
-    """Collection of gates that will be fused and applied as single gate during simulation.
+    """Collection of gates that will be fused and applied as single gate during
+    simulation.
+
     This gate is constructed automatically by :meth:`qibo.models.circuit.Circuit.fuse`
     and should not be used by user.
     """
