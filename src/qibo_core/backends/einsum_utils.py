@@ -1,10 +1,10 @@
-"""
-Gates use ``einsum`` to apply gates to state vectors. The einsum string that
-specifies the contraction indices is created using the following methods and
-used by :meth:`qibo.backends.numpy.NumpyEngine.apply_gate`.
+"""Gates use ``einsum`` to apply gates to state vectors.
+
+The einsum string that specifies the contraction indices is created using the following
+methods and used by :meth:`qibo.backends.numpy.NumpyEngine.apply_gate`.
 """
 
-from qibo.config import EINSUM_CHARS, raise_error
+from qibo_core.config import EINSUM_CHARS, raise_error
 
 
 def prepare_strings(qubits, nqubits):

@@ -6,11 +6,11 @@ from typing import Optional, Tuple
 
 import numpy as np
 
-from qibo.backends import _check_backend
-from qibo.config import PRECISION_TOL, raise_error
-from qibo.gates.abstract import Gate
-from qibo.gates.gates import I, Unitary, X, Y, Z
-from qibo.gates.special import FusedGate
+from qibo_core.backends import _check_backend
+from qibo_core.config import PRECISION_TOL, raise_error
+from .abstract import Gate
+from .gates import I, Unitary, X, Y, Z
+from .special import FusedGate
 
 
 class Channel(Gate):
@@ -44,8 +44,8 @@ class Channel(Gate):
         return backend.apply_channel(self, state, nqubits)
 
     def to_choi(self, nqubits: Optional[int] = None, order: str = "row", backend=None):
-        """Returns the Choi representation :math:`\\mathcal{E}`
-        of the Kraus channel :math:`\\{K_{\\alpha}\\}_{\\alpha}`.
+        """Returns the Choi representation :math:`\\mathcal{E}` of the Kraus
+        channel :math:`\\{K_{\\alpha}\\}_{\\alpha}`.
 
         .. math::
             \\mathcal{E} = \\sum_{\\alpha} \\, |K_{\\alpha}\\rangle\\rangle
@@ -141,8 +141,8 @@ class Channel(Gate):
         pauli_order: str = "IXYZ",
         backend=None,
     ):
-        """Returns the Liouville representation of the channel
-        in the Pauli basis.
+        """Returns the Liouville representation of the channel in the Pauli
+        basis.
 
         Args:
             nqubits (int, optional): total number of qubits to be considered
@@ -369,7 +369,8 @@ class UnitaryChannel(KrausChannel):
 
 
 class PauliNoiseChannel(UnitaryChannel):
-    """Multi-qubit noise channel that applies Pauli operators with given probabilities.
+    """Multi-qubit noise channel that applies Pauli operators with given
+    probabilities.
 
     Implements the following transformation:
 
