@@ -3,8 +3,8 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     systems.url = "github:nix-systems/default";
     devenv.url = "github:cachix/devenv";
-    nixpkgs-python = {
-      url = "github:cachix/nixpkgs-python";
+    fenix = {
+      url = "github:nix-community/fenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -41,12 +41,10 @@
 
               languages.python = {
                 enable = true;
-                poetry = {
-                  enable = true;
-                  install.enable = true;
-                  install.allExtras = true;
-                };
-                version = "3.11";
+              };
+              languages.rust = {
+                enable = true;
+                channel = "stable";
               };
             }
           ];
