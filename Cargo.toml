@@ -1,0 +1,15 @@
+[workspace]
+members = ["qibo-core"]
+resolver = "2"
+
+[workspace.package]
+authors = ["Alessandro Candido <candido.ale@gmail.com>"]
+description = "Qibo framework core elements"
+readme = "README.md"
+categories = ["science"]
+edition = "2021"
+keywords = ["physics"]
+license = "GPL-3.0-or-later"
+repository = "https://github.com/AleCandido/partons"
+rust-version = "1.60.0"
+version = "0.0.1"
