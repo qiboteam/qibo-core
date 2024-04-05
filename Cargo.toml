@@ -1,6 +1,4 @@
 [workspace]
-members = ["qibo-core"]
-resolver = "2"
 
 [workspace.package]
 authors = ["Alessandro Candido <candido.ale@gmail.com>"]
@@ -13,3 +11,19 @@ license = "GPL-3.0-or-later"
 repository = "https://github.com/AleCandido/partons"
 rust-version = "1.60.0"
 version = "0.0.1"
+
+[package]
+name = "qibo-core"
+
+authors.workspace = true
+description.workspace = true
+readme.workspace = true
+categories.workspace = true
+edition.workspace = true
+keywords.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[dependencies]
