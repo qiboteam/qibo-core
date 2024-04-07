@@ -1,0 +1,20 @@
+[package]
+name = "qibo-core-py"
+
+authors.workspace = true
+description.workspace = true
+readme.workspace = true
+categories.workspace = true
+edition.workspace = true
+keywords.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[lib]
+name = "qibo_core_py"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = "0.20.0"

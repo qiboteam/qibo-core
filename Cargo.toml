@@ -1,4 +1,5 @@
 [workspace]
+members = ["qibo-core-py"]
 
 [workspace.package]
 authors = ["Alessandro Candido <candido.ale@gmail.com>"]
