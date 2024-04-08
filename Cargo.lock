@@ -178,14 +178,14 @@ dependencies = [
 
 [[package]]
 name = "qibo-core"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "enum_dispatch",
 ]
 
 [[package]]
 name = "qibo-core-py"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "pyo3",
 ]
