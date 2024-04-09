@@ -1,17 +1,14 @@
-use enum_dispatch::enum_dispatch;
+pub use self::more::More;
+pub use self::one::One;
+pub use self::two::Two;
 
-use self::single::{H, RX, X, Y};
+mod more;
+mod one;
+mod two;
 
-pub(crate) mod single;
-
-#[enum_dispatch]
-trait GateT {}
-
-#[enum_dispatch(GateT)]
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum Gate {
-    H,
-    X,
-    Y,
-    RX,
+    One(One),
+    Two(Two),
+    More(More),
 }
