@@ -1,14 +1,11 @@
 use pyo3::prelude::*;
 
-/// Formats the sum of two numbers as string.
-#[pyfunction]
-fn sum_as_string(a: usize, b: usize) -> PyResult<String> {
-    Ok((a + b).to_string())
-}
+mod all;
 
-/// A Python module implemented in Rust.
+use all::*;
+
 #[pymodule]
-fn qibo_core_py(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(sum_as_string, m)?)?;
+fn qibo_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_class::<PyGate>()?;
     Ok(())
 }

@@ -13,8 +13,9 @@ rust-version.workspace = true
 version.workspace = true
 
 [lib]
-name = "qibo_core_py"
+name = "qibo_core"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = "0.20.0"
+pyo3 = { version = "0.21.1", features = ["experimental-declarative-modules"] }
+qibo-core = { version = "0.0.1", path = ".." }
