@@ -1,3 +1,5 @@
+use std::fmt::{self, Display};
+
 use crate::gate::Gate;
 
 /// A discrete gate-based representation of a quantum computation.
@@ -13,7 +15,7 @@ pub struct Circuit {
     /// Set of gates
     gates: Vec<Gate>,
     /// Gates connectivity
-    edges: Vec<(usize, usize)>,
+    edges: Vec<(Option<usize>, usize)>,
     /// Current final gates of each wire
     ends: Vec<Option<usize>>,
 }
@@ -25,5 +27,41 @@ impl Circuit {
             edges: vec![],
             ends: vec![None; elements],
         }
+    }
+
+    pub fn add(&mut self, gate: Gate, element: usize) {
+        self.gates.push(gate);
+        // retrieve gate ID
+        let gid = self.gates.len() - 1;
+        self.edges.push((self.ends[element], gid));
+        self.ends[element] = Some(gid);
+    }
+
+    pub fn draw(&self) -> String {
+        let mut wires = vec![];
+        for (i, el) in self.ends.iter().enumerate() {
+            let mut wire = vec![];
+
+            let mut cur = el.clone();
+            while cur != None {
+                wire.push(format!("{:?}", self.gates[cur.unwrap()]));
+                cur = None;
+            }
+            wire.push(format!("{} ", i));
+            wires.push(
+                wire.iter()
+                    .rev()
+                    .map(|x| x.as_str())
+                    .collect::<Vec<&str>>()
+                    .join("-"),
+            );
+        }
+        wires.join("\n")
+    }
+}
+
+impl Display for Circuit {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.draw())
     }
 }
