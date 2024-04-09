@@ -19,11 +19,11 @@ pub struct Circuit {
 }
 
 impl Circuit {
-    pub fn new(elements: i32) -> Self {
+    pub fn new(elements: usize) -> Self {
         Circuit {
             gates: vec![],
             edges: vec![],
-            ends: vec![None; qubits],
+            ends: vec![None; elements],
         }
     }
 }
