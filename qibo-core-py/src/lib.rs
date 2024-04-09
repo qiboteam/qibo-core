@@ -6,6 +6,6 @@ use all::*;
 
 #[pymodule]
 fn qibo_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add_class::<PyGate>()?;
+    m.add_class::<Gate>()?;
     Ok(())
 }
