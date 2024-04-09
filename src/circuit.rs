@@ -47,12 +47,12 @@ impl Circuit {
         panic!("Gate not found")
     }
 
-    pub fn wire(&self, element: usize) -> Vec<&Gate> {
+    pub fn wire(&self, element: usize) -> Vec<Gate> {
         let mut wire = vec![];
         let mut cur = self.ends[element].clone();
         while cur != None {
             let gid = cur.unwrap();
-            wire.push(&self.gates[gid]);
+            wire.push(self.gates[gid].clone());
             cur = self.previous(gid);
         }
         wire
