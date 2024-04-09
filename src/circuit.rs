@@ -1,3 +1,4 @@
+use core::panic;
 use std::fmt::{self, Display};
 
 use crate::gate::Gate;
@@ -37,16 +38,39 @@ impl Circuit {
         self.ends[element] = Some(gid);
     }
 
+    fn previous(&self, gid: usize) -> Option<usize> {
+        for e in self.edges.iter() {
+            if e.1 == gid {
+                return e.0;
+            }
+        }
+        panic!("Gate not found")
+    }
+
+    pub fn wire(&self, element: usize) -> Vec<&Gate> {
+        let mut wire = vec![];
+        let mut cur = self.ends[element].clone();
+        while cur != None {
+            let gid = cur.unwrap();
+            wire.push(&self.gates[gid]);
+            cur = self.previous(gid);
+        }
+        wire
+    }
+
+    pub fn elements(&self) -> usize {
+        self.ends.len()
+    }
+
     pub fn draw(&self) -> String {
         let mut wires = vec![];
-        for (i, el) in self.ends.iter().enumerate() {
-            let mut wire = vec![];
+        for i in 0..self.elements() {
+            let mut wire: Vec<String> = self
+                .wire(i)
+                .into_iter()
+                .map(|g| format!("{:?}", g))
+                .collect();
 
-            let mut cur = el.clone();
-            while cur != None {
-                wire.push(format!("{:?}", self.gates[cur.unwrap()]));
-                cur = None;
-            }
             wire.push(format!("{} ", i));
             wires.push(
                 wire.iter()
