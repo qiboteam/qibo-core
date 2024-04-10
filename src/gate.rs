@@ -1,6 +1,6 @@
-pub use self::more::More;
-pub use self::one::One;
-pub use self::two::Two;
+pub use self::more::More::{self, *};
+pub use self::one::One::{self, *};
+pub use self::two::Two::{self, *};
 
 mod more;
 mod one;
@@ -11,4 +11,22 @@ pub enum Gate {
     One(One),
     Two(Two),
     More(More),
+}
+
+impl From<One> for Gate {
+    fn from(gate: One) -> Self {
+        Self::One(gate)
+    }
+}
+
+impl From<Two> for Gate {
+    fn from(gate: Two) -> Self {
+        Self::Two(gate)
+    }
+}
+
+impl From<More> for Gate {
+    fn from(gate: More) -> Self {
+        Self::More(gate)
+    }
 }

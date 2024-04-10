@@ -1,2 +1,4 @@
 #[derive(Debug, Clone, Copy)]
-pub enum Two {}
+pub enum Two {
+    CNOT,
+}
