@@ -1,7 +1,18 @@
 use core::panic;
 use std::fmt::{self, Display};
 
-use crate::gate::Gate::{self, One};
+use crate::gate::Gate;
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+struct Node {
+    /// Gate ID
+    gid: usize,
+    /// Internal element
+    element: usize,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct Edge(Option<Node>, Node);
 
 /// A discrete gate-based representation of a quantum computation.
 ///
@@ -16,9 +27,9 @@ pub struct Circuit {
     /// Set of gates
     gates: Vec<Gate>,
     /// Gates connectivity
-    edges: Vec<(Option<usize>, usize)>,
+    edges: Vec<Edge>,
     /// Current final gates of each wire
-    ends: Vec<Option<usize>>,
+    ends: Vec<Option<Node>>,
 }
 
 impl Circuit {
@@ -34,13 +45,16 @@ impl Circuit {
         self.gates.push(gate);
         // retrieve gate ID
         let gid = self.gates.len() - 1;
-        self.edges.push((self.ends[elements[0]], gid));
-        self.ends[elements[0]] = Some(gid);
+        for (i, &el) in elements.iter().enumerate() {
+            let node = Node { gid, element: i };
+            self.edges.push(Edge(self.ends[el], node));
+            self.ends[el] = Some(node);
+        }
     }
 
-    fn previous(&self, gid: usize) -> Option<usize> {
+    fn previous(&self, node: Node) -> Option<Node> {
         for e in self.edges.iter() {
-            if e.1 == gid {
+            if e.1 == node {
                 return e.0;
             }
         }
@@ -49,16 +63,12 @@ impl Circuit {
 
     pub fn wire(&self, element: usize) -> Vec<Gate> {
         let mut wire = vec![];
-        let mut cur = self.ends[element].clone();
-        while cur != None {
-            let gid = cur.unwrap();
-            let gate = self.gates[gid].clone();
-            if let One(_) = gate {
-            } else {
-                panic!("Only resolving wires through 1-element gates")
-            }
+        let mut current = self.ends[element].clone();
+        while current != None {
+            let node = current.unwrap();
+            let gate = self.gates[node.gid].clone();
             wire.push(gate);
-            cur = self.previous(gid);
+            current = self.previous(node);
         }
         wire
     }
