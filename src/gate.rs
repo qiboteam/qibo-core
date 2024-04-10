@@ -32,7 +32,7 @@ impl From<More> for Gate {
 }
 
 impl Gate {
-    pub(crate) fn elements(&self) -> usize {
+    pub fn elements(&self) -> usize {
         match *self {
             Self::One(_) => 1,
             Self::Two(_) => 2,
