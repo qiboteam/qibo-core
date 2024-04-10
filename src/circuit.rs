@@ -1,7 +1,7 @@
 use core::panic;
 use std::fmt::{self, Display};
 
-use crate::gate::Gate;
+use crate::gate::Gate::{self, One};
 
 /// A discrete gate-based representation of a quantum computation.
 ///
@@ -30,12 +30,12 @@ impl Circuit {
         }
     }
 
-    pub fn add(&mut self, gate: Gate, element: usize) {
+    pub fn add(&mut self, gate: Gate, elements: Vec<usize>) {
         self.gates.push(gate);
         // retrieve gate ID
         let gid = self.gates.len() - 1;
-        self.edges.push((self.ends[element], gid));
-        self.ends[element] = Some(gid);
+        self.edges.push((self.ends[elements[0]], gid));
+        self.ends[elements[0]] = Some(gid);
     }
 
     fn previous(&self, gid: usize) -> Option<usize> {
@@ -52,7 +52,12 @@ impl Circuit {
         let mut cur = self.ends[element].clone();
         while cur != None {
             let gid = cur.unwrap();
-            wire.push(self.gates[gid].clone());
+            let gate = self.gates[gid].clone();
+            if let One(_) = gate {
+            } else {
+                panic!("Only resolving wires through 1-element gates")
+            }
+            wire.push(gate);
             cur = self.previous(gid);
         }
         wire

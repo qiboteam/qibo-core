@@ -30,3 +30,13 @@ impl From<More> for Gate {
         Self::More(gate)
     }
 }
+
+impl Gate {
+    pub(crate) fn elements(&self) -> usize {
+        match *self {
+            Self::One(_) => 1,
+            Self::Two(_) => 2,
+            Self::More(gate) => gate.elements(),
+        }
+    }
+}
