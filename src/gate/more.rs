@@ -1,2 +1,4 @@
 #[derive(Debug, Clone, Copy)]
-pub enum More {}
+pub enum More {
+    CCNOT,
+}
