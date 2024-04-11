@@ -43,17 +43,16 @@ impl Gate {
     }
 }
 
+pub(self) fn extract_name<T: fmt::Debug>(gate: T) -> String {
+    format!("{:?}", gate).split("(").next().unwrap().to_owned()
+}
+
 impl Display for Gate {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(
-            &match self {
-                Self::One(x) => format!("{:?}", x),
-                Self::Two(x) => format!("{:?}", x),
-                Self::More(x) => format!("{:?}", x),
-            }
-            .split("(")
-            .next()
-            .unwrap(),
-        )
+        f.write_str(&match self {
+            Self::One(x) => format!("{}", x),
+            Self::Two(x) => format!("{}", x),
+            Self::More(x) => format!("{}", x),
+        })
     }
 }

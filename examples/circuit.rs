@@ -7,6 +7,7 @@ fn main() {
     circuit.add(H.into(), vec![2]);
     circuit.add(CNOT.into(), vec![2, 1]);
     circuit.add(Y.into(), vec![4]);
+    circuit.add(RX(3.14).into(), vec![0]);
 
     println!("{}", circuit);
 }
