@@ -6,26 +6,27 @@ pub mod gate {
     use super::*;
 
     #[pyfunction]
-    pub fn X() -> Gate {
+    fn X() -> Gate {
         Gate((prelude::X {}).into())
     }
 
     #[pyfunction]
-    pub fn RX(angle: f64) -> Gate {
+    fn RX(angle: f64) -> Gate {
         Gate((prelude::RX(angle)).into())
     }
 
     #[pyfunction]
-    pub fn CNOT() -> Gate {
+    fn CNOT() -> Gate {
         Gate((prelude::CNOT {}).into())
     }
 
     #[pyclass]
-    pub struct Gate(prelude::Gate);
+    #[derive(Clone)]
+    pub struct Gate(pub(crate) prelude::Gate);
 
     #[pymethods]
     impl Gate {
-        pub fn elements(&self) -> usize {
+        fn elements(&self) -> usize {
             self.0.elements()
         }
     }
