@@ -1,6 +1,9 @@
-from qibo_core import Gate
+from qibo_core import gate
 
-X = lambda: Gate("X")
-Y = lambda: Gate("Y")
+# waiting for PyO3 v0.22
+# https://github.com/PyO3/pyo3/issues/3900
+# https://github.com/PyO3/pyo3/issues/759
+X = gate.X
+RX = gate.RX
 
-print([X() if i % 2 == 0 else Y() for i in range(7)])
+print([X() if i % 2 == 0 else RX(i) for i in range(7)])
