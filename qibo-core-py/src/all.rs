@@ -1,18 +1,32 @@
 use pyo3::prelude::*;
 use qibo_core::prelude;
 
-#[pyclass]
-pub struct Gate(prelude::Gate);
+#[pymodule]
+pub mod gate {
+    use super::*;
 
-#[pymethods]
-impl Gate {
-    #[new]
-    pub fn new_gate(name: &str) -> Gate {
-        Gate(match name {
-            "X" => (prelude::X {}).into(),
-            "Y" => (prelude::Y {}).into(),
-            "H" => (prelude::H {}).into(),
-            _ => panic!("Unknown gate"),
-        })
+    #[pyfunction]
+    pub fn X() -> Gate {
+        Gate((prelude::X {}).into())
+    }
+
+    #[pyfunction]
+    pub fn RX(angle: f64) -> Gate {
+        Gate((prelude::RX(angle)).into())
+    }
+
+    #[pyfunction]
+    pub fn CNOT() -> Gate {
+        Gate((prelude::CNOT {}).into())
+    }
+
+    #[pyclass]
+    pub struct Gate(prelude::Gate);
+
+    #[pymethods]
+    impl Gate {
+        pub fn elements(&self) -> usize {
+            self.0.elements()
+        }
     }
 }

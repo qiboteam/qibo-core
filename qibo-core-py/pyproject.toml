@@ -12,5 +12,9 @@ classifiers = [
 ]
 dynamic = ["version"]
 
+[project.optional-dependencies]
+dev = ["ipython"]
+test = ["pytest < 5.0.0", "pytest-cov[all]"]
+
 [tool.maturin]
 features = ["pyo3/extension-module"]
