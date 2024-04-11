@@ -1,3 +1,5 @@
+use std::fmt::{self, Display};
+
 pub use self::more::More::{self, *};
 pub use self::one::One::{self, *};
 pub use self::two::Two::{self, *};
@@ -38,5 +40,20 @@ impl Gate {
             Self::Two(_) => 2,
             Self::More(gate) => gate.elements(),
         }
+    }
+}
+
+impl Display for Gate {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(
+            &match self {
+                Self::One(x) => format!("{:?}", x),
+                Self::Two(x) => format!("{:?}", x),
+                Self::More(x) => format!("{:?}", x),
+            }
+            .split("(")
+            .next()
+            .unwrap(),
+        )
     }
 }

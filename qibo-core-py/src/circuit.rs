@@ -20,5 +20,9 @@ pub mod circuit {
         fn add(&mut self, gate: Gate, elements: Vec<usize>) {
             self.0.add(gate.0, elements);
         }
+
+        fn __str__(&self) -> String {
+            format!("{}", self.0)
+        }
     }
 }

@@ -80,11 +80,8 @@ impl Circuit {
     pub fn draw(&self) -> String {
         let mut wires = vec![];
         for i in 0..self.elements() {
-            let mut wire: Vec<String> = self
-                .wire(i)
-                .into_iter()
-                .map(|g| format!("{:?}", g))
-                .collect();
+            let mut wire: Vec<String> =
+                self.wire(i).into_iter().map(|g| format!("{}", g)).collect();
 
             wire.push(format!("{} ", i));
             wires.push(
