@@ -1,8 +1,4 @@
-use core::panic;
-use std::{
-    fmt::{self, Display},
-    fs::read,
-};
+use std::fmt::{self, Display};
 
 use crate::gate::Gate;
 
@@ -147,11 +143,25 @@ impl Circuit {
                     wires[self.targets(gid)[0]] += &format!("-{gate}");
                 }
                 _ => {
-                    // pad and add the two qubits gate
+                    pad(&mut wires);
+                    let targets = self.targets(gid);
+                    let (up, down) = (targets.iter().min().unwrap(), targets.iter().max().unwrap());
+                    for w in 0..self.elements() {
+                        let g = format!("-{gate}");
+                        wires[w] += if w == targets[0] {
+                            &g
+                        } else if w < *up || w > *down {
+                            "--"
+                        } else if targets.iter().position(|x| *x == w) == None {
+                            "-|"
+                        } else {
+                            "-o"
+                        }
+                    }
                 }
             }
         }
-        // pad with final dashes, make sure the length is uniform
+        pad(&mut wires);
 
         wires.join("\n")
 
@@ -167,6 +177,13 @@ impl Circuit {
         //     })
         //     .collect::<Vec<_>>()
         //     .join("\n")
+    }
+}
+
+fn pad(wires: &mut Vec<String>) {
+    let length = wires.iter().map(|w| w.len()).max().unwrap();
+    for wire in wires.iter_mut() {
+        wire.push_str(&"-".repeat(length.saturating_sub(wire.len())))
     }
 }
 
