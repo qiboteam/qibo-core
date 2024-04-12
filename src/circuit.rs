@@ -41,7 +41,7 @@ impl Circuit {
         }
     }
 
-    pub fn add(&mut self, gate: Gate, elements: Vec<usize>) {
+    pub fn add(&mut self, gate: Gate, elements: Vec<usize>) -> usize {
         self.gates.push(gate);
         // retrieve gate ID
         let gid = self.gates.len() - 1;
@@ -50,15 +50,35 @@ impl Circuit {
             self.edges.push(Edge(self.ends[el], node));
             self.ends[el] = Some(node);
         }
+        gid
     }
 
-    fn previous(&self, node: Node) -> Option<Node> {
+    fn previous(&self, node: Node) -> Result<Option<Node>, ()> {
         for e in self.edges.iter() {
             if e.1 == node {
-                return e.0;
+                return Ok(e.0);
             }
         }
-        panic!("Gate not found")
+        Err(())
+    }
+
+    /// Return the next node in the wire
+    ///
+    /// If the node is the last one in the wire `Ok(None)` is returned. If the node is not found,
+    /// `Err(())` is returned.
+    fn next(&self, node: Node) -> Result<Option<Node>, ()> {
+        for end in self.ends.iter() {
+            if *end == Some(node) {
+                return Ok(None);
+            }
+        }
+
+        for e in self.edges.iter() {
+            if e.0 == Some(node) {
+                return Ok(Some(e.1));
+            }
+        }
+        Err(())
     }
 
     pub fn wire(&self, element: usize) -> Vec<Gate> {
@@ -68,31 +88,56 @@ impl Circuit {
             let node = current.unwrap();
             let gate = self.gates[node.gid].clone();
             wire.push(gate);
-            current = self.previous(node);
+            current = self.previous(node).expect("Gate not found");
         }
-        wire
+        wire.into_iter().rev().collect()
     }
 
     pub fn elements(&self) -> usize {
         self.ends.len()
     }
 
-    pub fn draw(&self) -> String {
-        let mut wires = vec![];
-        for i in 0..self.elements() {
-            let mut wire: Vec<String> =
-                self.wire(i).into_iter().map(|g| format!("{}", g)).collect();
+    pub fn wires(&self) -> Vec<Vec<Gate>> {
+        (0..self.elements()).map(|i| self.wire(i)).collect()
+    }
 
-            wire.push(format!("{} ", i));
-            wires.push(
-                wire.iter()
-                    .rev()
-                    .map(|x| x.as_str())
-                    .collect::<Vec<&str>>()
-                    .join("-"),
-            );
+    fn target(&self, node: Node) -> Option<usize> {
+        let mut current = Some(node);
+        while current != None {
+            match self.next(current.unwrap()) {
+                Ok(next @ Some(_)) => {
+                    current = next;
+                }
+                Ok(None) => {
+                    break;
+                }
+                Err(()) => {
+                    return None;
+                }
+            }
         }
-        wires.join("\n")
+        self.ends.iter().position(|x| *x == current)
+    }
+
+    pub fn targets(&self, gid: usize) -> Vec<usize> {
+        (0..self.gates[gid].elements())
+            .map(|element| self.target(Node { gid, element }).expect("Dangling gate"))
+            .collect()
+    }
+
+    pub fn draw(&self) -> String {
+        self.wires()
+            .iter()
+            .enumerate()
+            .map(|(i, w)| {
+                format!("{}: ", i)
+                    + &w.iter()
+                        .map(|g| format!("{}", g))
+                        .collect::<Vec<_>>()
+                        .join("-")
+            })
+            .collect::<Vec<_>>()
+            .join("\n")
     }
 }
 
