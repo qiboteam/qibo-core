@@ -1,5 +1,8 @@
 use core::panic;
-use std::fmt::{self, Display};
+use std::{
+    fmt::{self, Display},
+    fs::read,
+};
 
 use crate::gate::Gate;
 
@@ -119,25 +122,51 @@ impl Circuit {
         self.ends.iter().position(|x| *x == current)
     }
 
-    pub fn targets(&self, gid: usize) -> Vec<usize> {
+    fn nodes(&self, gid: usize) -> Vec<Node> {
         (0..self.gates[gid].elements())
-            .map(|element| self.target(Node { gid, element }).expect("Dangling gate"))
+            .map(|element| Node { gid, element })
+            .collect()
+    }
+
+    /// Determine the targets for a certain gate.
+    pub fn targets(&self, gid: usize) -> Vec<usize> {
+        self.nodes(gid)
+            .into_iter()
+            .map(|n| self.target(n).expect("Dangling gate"))
             .collect()
     }
 
     pub fn draw(&self) -> String {
-        self.wires()
-            .iter()
-            .enumerate()
-            .map(|(i, w)| {
-                format!("{}: ", i)
-                    + &w.iter()
-                        .map(|g| format!("{}", g))
-                        .collect::<Vec<_>>()
-                        .join("-")
-            })
-            .collect::<Vec<_>>()
-            .join("\n")
+        // let mut columns = vec![0; self.elements()];
+
+        let mut wires: Vec<String> = (0..self.elements()).map(|i| format!("{i}: ")).collect();
+
+        for (gid, gate) in self.gates.iter().enumerate() {
+            match gate {
+                &Gate::One(_) => {
+                    wires[self.targets(gid)[0]] += &format!("-{gate}");
+                }
+                _ => {
+                    // pad and add the two qubits gate
+                }
+            }
+        }
+        // pad with final dashes, make sure the length is uniform
+
+        wires.join("\n")
+
+        // self.wires()
+        //     .iter()
+        //     .enumerate()
+        //     .map(|(i, w)| {
+        //         format!("{}: ", i)
+        //             + &w.iter()
+        //                 .map(|g| format!("{}", g))
+        //                 .collect::<Vec<_>>()
+        //                 .join("-")
+        //     })
+        //     .collect::<Vec<_>>()
+        //     .join("\n")
     }
 }
 
