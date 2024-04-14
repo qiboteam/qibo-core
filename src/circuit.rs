@@ -135,55 +135,44 @@ impl Circuit {
     pub fn draw(&self) -> String {
         // let mut columns = vec![0; self.elements()];
 
-        let mut wires: Vec<String> = (0..self.elements()).map(|i| format!("{i}: ")).collect();
+        let mut wires: Vec<String> = (0..self.elements()).map(|i| format!("q{i}: ")).collect();
 
         for (gid, gate) in self.gates.iter().enumerate() {
             match gate {
                 &Gate::One(_) => {
-                    wires[self.targets(gid)[0]] += &format!("-{gate}");
+                    wires[self.targets(gid)[0]] += &format!("{SEG}{gate}");
                 }
                 _ => {
                     pad(&mut wires);
                     let targets = self.targets(gid);
                     let (up, down) = (targets.iter().min().unwrap(), targets.iter().max().unwrap());
                     for w in 0..self.elements() {
-                        let g = format!("-{gate}");
-                        wires[w] += if w == targets[0] {
-                            &g
+                        wires[w] += &(if w == targets[0] {
+                            format!("{SEG}o")
                         } else if w < *up || w > *down {
-                            "--"
+                            format!("{SEG}{SEG}")
                         } else if targets.iter().position(|x| *x == w) == None {
-                            "-|"
+                            format!("{SEG}|")
                         } else {
-                            "-o"
-                        }
+                            format!("{SEG}{gate}")
+                        })
                     }
                 }
             }
         }
         pad(&mut wires);
+        wires.iter_mut().for_each(|w| w.push_str(SEG));
 
         wires.join("\n")
-
-        // self.wires()
-        //     .iter()
-        //     .enumerate()
-        //     .map(|(i, w)| {
-        //         format!("{}: ", i)
-        //             + &w.iter()
-        //                 .map(|g| format!("{}", g))
-        //                 .collect::<Vec<_>>()
-        //                 .join("-")
-        //     })
-        //     .collect::<Vec<_>>()
-        //     .join("\n")
     }
 }
+
+const SEG: &str = "-";
 
 fn pad(wires: &mut Vec<String>) {
     let length = wires.iter().map(|w| w.len()).max().unwrap();
     for wire in wires.iter_mut() {
-        wire.push_str(&"-".repeat(length.saturating_sub(wire.len())))
+        wire.push_str(&SEG.repeat(length.saturating_sub(wire.len())))
     }
 }
 
