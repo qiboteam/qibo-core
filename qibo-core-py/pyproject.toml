@@ -13,7 +13,7 @@ classifiers = [
 dynamic = ["version"]
 
 [project.optional-dependencies]
-dev = ["ipython"]
+dev = ["ipython", "pdbpp"]
 test = ["pytest>7", "pytest-cov[all]", "qibo==0.2.7"]
 
 [tool.maturin]
