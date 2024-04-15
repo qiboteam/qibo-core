@@ -32,11 +32,11 @@ pub struct Circuit {
 }
 
 impl Circuit {
-    pub fn new(elements: usize) -> Self {
+    pub fn new(n_elements: usize) -> Self {
         Circuit {
             gates: vec![],
             edges: vec![],
-            ends: vec![None; elements],
+            ends: vec![None; n_elements],
         }
     }
 
@@ -92,15 +92,15 @@ impl Circuit {
         wire.into_iter().rev().collect()
     }
 
-    pub fn elements(&self) -> usize {
+    pub fn n_elements(&self) -> usize {
         self.ends.len()
     }
 
     pub fn wires(&self) -> Vec<Vec<Gate>> {
-        (0..self.elements()).map(|i| self.wire(i)).collect()
+        (0..self.n_elements()).map(|i| self.wire(i)).collect()
     }
 
-    fn target(&self, node: Node) -> Option<usize> {
+    fn element(&self, node: Node) -> Option<usize> {
         let mut current = Some(node);
         while current != None {
             match self.next(current.unwrap()) {
@@ -124,34 +124,35 @@ impl Circuit {
             .collect()
     }
 
-    /// Determine the targets for a certain gate.
-    pub fn targets(&self, gid: usize) -> Vec<usize> {
+    /// Determine the elements the specified gate is acting on.
+    pub fn elements(&self, gid: usize) -> Vec<usize> {
         self.nodes(gid)
             .into_iter()
-            .map(|n| self.target(n).expect("Dangling gate"))
+            .map(|n| self.element(n).expect("Dangling gate"))
             .collect()
     }
 
     pub fn draw(&self) -> String {
-        // let mut columns = vec![0; self.elements()];
-
-        let mut wires: Vec<String> = (0..self.elements()).map(|i| format!("q{i}: ")).collect();
+        let mut wires: Vec<String> = (0..self.n_elements()).map(|i| format!("q{i}: ")).collect();
 
         for (gid, gate) in self.gates.iter().enumerate() {
             match gate {
                 &Gate::One(_) => {
-                    wires[self.targets(gid)[0]] += &format!("{SEG}{gate}");
+                    wires[self.elements(gid)[0]] += &format!("{SEG}{gate}");
                 }
                 _ => {
                     pad(&mut wires);
-                    let targets = self.targets(gid);
-                    let (up, down) = (targets.iter().min().unwrap(), targets.iter().max().unwrap());
-                    for w in 0..self.elements() {
-                        wires[w] += &(if targets[..gate.targets()].contains(&w) {
+                    let elements = self.elements(gid);
+                    let (up, down) = (
+                        elements.iter().min().unwrap(),
+                        elements.iter().max().unwrap(),
+                    );
+                    for w in 0..self.n_elements() {
+                        wires[w] += &(if elements[..gate.targets()].contains(&w) {
                             format!("{SEG}{gate}")
                         } else if w < *up || w > *down {
                             format!("{SEG}{SEG}")
-                        } else if targets.iter().position(|x| *x == w) == None {
+                        } else if elements.iter().position(|x| *x == w) == None {
                             format!("{SEG}|")
                         } else {
                             format!("{SEG}o")
