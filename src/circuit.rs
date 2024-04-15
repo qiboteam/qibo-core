@@ -147,16 +147,17 @@ impl Circuit {
                     let targets = self.targets(gid);
                     let (up, down) = (targets.iter().min().unwrap(), targets.iter().max().unwrap());
                     for w in 0..self.elements() {
-                        wires[w] += &(if w == targets[0] {
-                            format!("{SEG}o")
+                        wires[w] += &(if targets[..gate.targets()].contains(&w) {
+                            format!("{SEG}{gate}")
                         } else if w < *up || w > *down {
                             format!("{SEG}{SEG}")
                         } else if targets.iter().position(|x| *x == w) == None {
                             format!("{SEG}|")
                         } else {
-                            format!("{SEG}{gate}")
+                            format!("{SEG}o")
                         })
                     }
+                    pad(&mut wires);
                 }
             }
         }
