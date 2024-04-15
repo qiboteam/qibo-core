@@ -7,6 +7,15 @@ pub enum Two {
     SWAP,
 }
 
+impl Two {
+    pub(super) fn targets(&self) -> usize {
+        match *self {
+            Self::SWAP => 2,
+            _ => 1,
+        }
+    }
+}
+
 impl Display for Two {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(match self {

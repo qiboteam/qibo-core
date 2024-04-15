@@ -11,6 +11,10 @@ impl More {
             Self::TOFFOLI => 3,
         }
     }
+
+    pub(super) fn targets(&self) -> usize {
+        1
+    }
 }
 
 impl Display for More {

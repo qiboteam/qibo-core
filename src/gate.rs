@@ -41,6 +41,14 @@ impl Gate {
             Self::More(gate) => gate.elements(),
         }
     }
+
+    pub fn targets(&self) -> usize {
+        match *self {
+            Self::One(_) => 1,
+            Self::Two(gate) => gate.targets(),
+            Self::More(gate) => gate.targets(),
+        }
+    }
 }
 
 pub(self) fn extract_name<T: fmt::Debug>(gate: T) -> String {
