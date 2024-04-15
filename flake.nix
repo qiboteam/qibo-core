@@ -41,6 +41,7 @@
 
               languages.python = {
                 enable = true;
+                poetry.enable = true;
               };
               languages.rust = {
                 enable = true;
