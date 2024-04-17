@@ -1,8 +1,9 @@
 use qibo_core::prelude::*;
 
 fn main() {
-    let backend = Backend::spawn("numpy").expect("Backend not found.");
-    let res = backend.execute("42").unwrap();
+    let backend = Client::spawn("numpy").expect("Backend not found.");
+    let res = backend
+        .execute("ciao, come va?\nbene grazie\ne tu?")
+        .unwrap();
     println!("{}", res);
-    backend.close().unwrap();
 }
