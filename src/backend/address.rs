@@ -1,3 +1,4 @@
+use std::convert::TryFrom;
 use std::fmt::{self, Display};
 use std::net::TcpListener;
 use std::ops::Range;
@@ -25,5 +26,14 @@ impl Address {
 impl Display for Address {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{LOCAL}:{}", self.0)
+    }
+}
+
+impl TryFrom<&str> for Address {
+    type Error = ();
+
+    fn try_from(arg: &str) -> Result<Self, ()> {
+        let port = arg.split(":").collect::<Vec<_>>()[1];
+        Ok(Address(port.parse().map_err(|_| ())?))
     }
 }
