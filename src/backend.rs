@@ -1,9 +1,11 @@
 use std::io::{self, Read, Write};
 use std::net::{TcpListener, TcpStream};
+use std::ops::{Deref, Range};
 use std::process::Command;
 
 const PREFIX: &str = "qibo-backend";
 const LOCAL: &str = "127.0.0.1";
+const PORT_RANGE: Range<u16> = 10000..11000;
 
 #[derive(Debug)]
 struct Port(u16);
@@ -14,7 +16,8 @@ impl Port {
     }
 
     fn new() -> Result<Self, ()> {
-        (10000..11000)
+        PORT_RANGE
+            .clone()
             .find(|p| Self(*p).available())
             .map(|p| Self(p))
             .ok_or(())
@@ -24,6 +27,14 @@ impl Port {
 impl From<u16> for Port {
     fn from(value: u16) -> Self {
         Self(value)
+    }
+}
+
+impl Deref for Port {
+    type Target = u16;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
@@ -37,6 +48,7 @@ impl Backend {
         let executable = format!("{PREFIX}-{name}");
 
         let port = Port::new().map_err(|_| io::Error::from(io::ErrorKind::Other))?;
+        println!("{executable}:{}", port.0);
 
         Command::new(executable).arg(port.0.to_string()).spawn()?;
 
@@ -52,13 +64,31 @@ impl Backend {
         format!("{LOCAL}:{port}")
     }
 
-    pub fn execute(&self, a: u8) -> io::Result<String> {
-        let mut stream = TcpStream::connect(self.address())?;
+    fn stream(&self) -> io::Result<TcpStream> {
+        TcpStream::connect(self.address())
+    }
+
+    fn write(&self, data: &str) -> io::Result<usize> {
+        let bytes: Vec<_> = data.bytes().collect();
+        self.stream()?.write(&bytes)
+    }
+
+    fn read(&self, buffer: &mut [u8]) -> io::Result<()> {
+        self.stream()?.read(buffer)?;
+        Ok(())
+    }
+
+    pub fn execute(&self, circuit: &str) -> io::Result<String> {
         let mut buffer = [0; 10];
 
-        stream.write(&[a])?;
-        stream.read(&mut buffer[..])?;
+        self.write(circuit)?;
+        self.read(&mut buffer[..])?;
 
         Ok(std::str::from_utf8(&buffer).unwrap().to_owned())
+    }
+
+    pub fn close(&self) -> io::Result<()> {
+        self.write("close")?;
+        Ok(())
     }
 }
