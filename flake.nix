@@ -31,7 +31,7 @@
               packages = with pkgs; [pre-commit maturin stdenv.cc.cc.lib];
 
               enterShell = ''
-                export PATH=$DEVENV_ROOT/examples/backends:$PATH
+                export PATH=$DEVENV_ROOT/target/backends:$PATH
               '';
 
               languages.python = {
