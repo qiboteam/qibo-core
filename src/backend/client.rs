@@ -1,6 +1,8 @@
-use std::io::{self, Read, Write};
+use std::io::{self, Error, ErrorKind, Result};
 use std::net::TcpStream;
 use std::process::Command;
+
+use crate::backend::message::Message;
 
 use super::address::Address;
 
@@ -18,12 +20,13 @@ impl Client {
 
         let executable = format!("{PREFIX}-{name}");
 
-        let address = Address::new().map_err(|_| io::Error::from(io::ErrorKind::Other))?;
+        let address = Address::new().map_err(|_| Error::from(io::ErrorKind::Other))?;
         println!("addr: {address}");
         println!("exec: {executable}");
 
         Command::new(executable).arg(&address.to_string()).spawn()?;
-        // TODO: drop the sleep
+        // TODO: drop the sleep, by waiting on some kind of activation signal
+        // e.g. it should try to open a connection, and close right after (or keep it)
         thread::sleep(time::Duration::from_millis(100));
 
         Ok(Self { address })
@@ -36,56 +39,44 @@ impl Client {
 
     fn stream(&self) -> io::Result<TcpStream> {
         TcpStream::connect(&self.address.to_string())
-        // TcpStream::connect(&"localhost:11000")
     }
 
-    fn write(&self, data: &str) -> io::Result<usize> {
-        let bytes: Vec<_> = data.bytes().collect();
-        self.stream()?.write(&bytes)
-    }
-
-    fn read(&self) -> io::Result<Vec<u8>> {
+    fn write(&self, data: &str) -> Result<()> {
+        // TODO: hold the stream, and avoid reinitializing it if the connection is open
         let mut stream = self.stream()?;
-
-        let mut buffer = [0; 1024];
-        let mut message = Vec::new();
-
-        let mut len = [0; 8];
-        stream.read_exact(&mut len)?;
-        let len = u64::from_le_bytes(len);
-        println!("{len}");
-
-        while (message.len() as u64) < len {
-            match stream.read(&mut buffer) {
-                Ok(bytes_read) if bytes_read > 0 => {
-                    println!("{:?}", &buffer[..bytes_read]);
-                    message.extend_from_slice(&buffer[..bytes_read]);
-                }
-                Ok(_) | Err(_) => {
-                    break;
-                }
-            }
-        }
-        Ok(message)
+        Message::Something(data.to_owned()).write(&mut stream)?;
+        Message::Close.write(&mut stream)
     }
 
-    pub fn execute(&self, circuit: &str) -> io::Result<String> {
+    pub fn execute(&self, circuit: &str) -> Result<String> {
         self.write(circuit)?;
-        let buffer = self.read()?;
-        println!("greater");
+        let msg = Message::read(&mut self.stream()?)?;
 
-        Ok(std::str::from_utf8(&buffer).unwrap().to_owned())
+        if let Message::Something(msg) = msg {
+            Ok(msg)
+        } else {
+            Err(Error::new(ErrorKind::Unsupported, ""))
+        }
     }
 
     pub fn close(&self) -> io::Result<()> {
-        println!("Closing {} backend", self.address);
-        self.write("close")?;
+        println!("Closing connection to backend {}", self.address);
+        Message::Close.write(&mut self.stream()?)?;
+        Ok(())
+    }
+
+    pub fn quit(&self) -> io::Result<()> {
+        println!("Quitting backend server {}", self.address);
+        Message::Quit.write(&mut self.stream()?)?;
         Ok(())
     }
 }
 
 impl Drop for Client {
     fn drop(&mut self) {
+        // TODO: attempt quitting the server
+        // the server will hold a subscribers count, and just lower it by one
+        // it will actually quit when it will reach 0
         if let Err(_) = self.close() {
             println!("Failed closing backend {}", self.address);
         }
