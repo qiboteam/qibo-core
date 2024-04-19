@@ -51,8 +51,6 @@ impl Server {
                 Subscribe => {
                     dbg!("subscribe");
                     self.clients += 1;
-                    // TODO: reuse the connection on the client -> avoid breaking
-                    break;
                 }
                 Something(msg) => {
                     dbg!(msg);
