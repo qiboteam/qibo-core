@@ -2,7 +2,7 @@ use std::io::{Error, ErrorKind, Result};
 use std::net::{TcpListener, TcpStream};
 
 use super::address::Address;
-use super::message::FromClient;
+use super::message::{FromClient, FromServer};
 
 #[derive(Debug)]
 pub struct Server {
@@ -39,7 +39,7 @@ impl Server {
     }
 
     fn reply(stream: &mut TcpStream) -> Result<()> {
-        FromClient::Something("".to_owned()).write(stream)?;
+        FromServer::Reply("response from server".to_owned()).write(stream)?;
         Ok(())
     }
 

@@ -2,7 +2,7 @@ use std::io::{self, Error, Result};
 use std::net::TcpStream;
 use std::process::Command;
 
-use crate::backend::message::FromClient;
+use crate::backend::message::{FromClient, FromServer};
 
 use super::address::Address;
 
@@ -54,16 +54,11 @@ impl Client {
         let mut stream = self.stream()?;
         FromClient::Something(circuit.to_owned()).write(&mut stream)?;
 
-        // let msg = FromClient::read(&mut self.stream()?)?;
-        //
-        // if let FromClient::Something(msg) = msg {
-        //     Ok(msg)
-        // } else {
-        //     Err(Error::new(ErrorKind::Unsupported, ""))
-        // }
+        let msg = FromServer::read(&mut stream)?;
+        let FromServer::Reply(msg) = msg;
 
         FromClient::Close.write(&mut stream)?;
-        Ok("".to_owned())
+        Ok(msg)
     }
 
     pub fn close(&self) -> io::Result<()> {

@@ -1,21 +1,6 @@
 use std::io::{Error, ErrorKind, Read, Result, Write};
 use std::net::TcpStream;
 
-#[derive(Debug)]
-#[repr(u8)]
-pub(super) enum FromServer {
-    Reply(String) = 0,
-}
-
-#[derive(Debug)]
-#[repr(u8)]
-pub(super) enum FromClient {
-    Quit = 0,
-    Subscribe = 1,
-    Close = 2,
-    Something(String) = 3,
-}
-
 fn discriminant<E>(var: &E) -> u8 {
     unsafe { *(var as *const E as *const u8) }
 }
@@ -58,6 +43,15 @@ fn write_message(stream: &mut TcpStream, discriminant: u8, mut data: Vec<u8>) ->
     Ok(())
 }
 
+#[derive(Debug)]
+#[repr(u8)]
+pub(super) enum FromClient {
+    Quit = 0,
+    Subscribe = 1,
+    Close = 2,
+    Something(String) = 3,
+}
+
 impl FromClient {
     pub(super) fn read(stream: &mut TcpStream) -> Result<Self> {
         match read_discriminant(stream)? {
@@ -75,6 +69,28 @@ impl FromClient {
             _ => {
                 vec![]
             }
+        };
+        write_message(stream, discriminant(self), data)
+    }
+}
+
+#[derive(Debug)]
+#[repr(u8)]
+pub(super) enum FromServer {
+    Reply(String) = 0,
+}
+
+impl FromServer {
+    pub(super) fn read(stream: &mut TcpStream) -> Result<Self> {
+        match read_discriminant(stream)? {
+            0 => Ok(Self::Reply(read_payload(stream)?)),
+            _ => Err(Error::new(ErrorKind::InvalidInput, "")),
+        }
+    }
+
+    pub(super) fn write(&self, stream: &mut TcpStream) -> Result<()> {
+        let data = match &self {
+            Self::Reply(payload) => write_length(payload.bytes().collect())?,
         };
         write_message(stream, discriminant(self), data)
     }
