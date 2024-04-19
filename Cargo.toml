@@ -29,3 +29,7 @@ version.workspace = true
 
 [dependencies]
 katexit = "0.1.4"
+
+[[example]]
+name = "qibo-backend-simple"
+path = "examples/backend/qibo-backend-simple.rs"
