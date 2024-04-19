@@ -9,8 +9,7 @@ fn main() -> Result<()> {
         println!("Expected argument '<address>:<port>'.");
         return Ok(());
     }
-    let server = Server::new(&args[1])?;
+    let mut server = Server::new(&args[1])?;
     server.listen()?;
-    dbg!(server);
     Ok(())
 }

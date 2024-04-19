@@ -1,4 +1,4 @@
-use std::io::{self, Error, ErrorKind, Result};
+use std::io::{self, Error, Result};
 use std::net::TcpStream;
 use std::process::Command;
 
@@ -15,7 +15,7 @@ pub struct Client {
 
 impl Client {
     /// Spawn a new server.
-    pub fn spawn(name: &str) -> io::Result<Self> {
+    pub fn spawn(name: &str) -> Result<Self> {
         use std::{thread, time};
 
         let executable = format!("{PREFIX}-{name}");
@@ -29,7 +29,10 @@ impl Client {
         // e.g. it should try to open a connection, and close right after (or keep it)
         thread::sleep(time::Duration::from_millis(100));
 
-        Ok(Self { address })
+        let client = Self { address };
+        client.subscribe()?;
+
+        Ok(client)
     }
 
     /// Connect to existing server.
@@ -41,22 +44,26 @@ impl Client {
         TcpStream::connect(&self.address.to_string())
     }
 
-    fn write(&self, data: &str) -> Result<()> {
-        // TODO: hold the stream, and avoid reinitializing it if the connection is open
-        let mut stream = self.stream()?;
-        Message::Something(data.to_owned()).write(&mut stream)?;
-        Message::Close.write(&mut stream)
+    pub fn subscribe(&self) -> Result<()> {
+        Message::Subscribe.write(&mut self.stream()?)?;
+        Ok(())
     }
 
     pub fn execute(&self, circuit: &str) -> Result<String> {
-        self.write(circuit)?;
-        let msg = Message::read(&mut self.stream()?)?;
+        // TODO: hold the stream, and avoid reinitializing it if the connection is open
+        let mut stream = self.stream()?;
+        Message::Something(circuit.to_owned()).write(&mut stream)?;
 
-        if let Message::Something(msg) = msg {
-            Ok(msg)
-        } else {
-            Err(Error::new(ErrorKind::Unsupported, ""))
-        }
+        // let msg = Message::read(&mut self.stream()?)?;
+        //
+        // if let Message::Something(msg) = msg {
+        //     Ok(msg)
+        // } else {
+        //     Err(Error::new(ErrorKind::Unsupported, ""))
+        // }
+
+        Message::Close.write(&mut stream)?;
+        Ok("".to_owned())
     }
 
     pub fn close(&self) -> io::Result<()> {
@@ -77,7 +84,7 @@ impl Drop for Client {
         // TODO: attempt quitting the server
         // the server will hold a subscribers count, and just lower it by one
         // it will actually quit when it will reach 0
-        if let Err(_) = self.close() {
+        if let Err(_) = self.quit() {
             println!("Failed closing backend {}", self.address);
         }
     }

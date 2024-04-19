@@ -5,8 +5,10 @@ use std::net::TcpStream;
 #[repr(u8)]
 pub(super) enum Message {
     Quit = 0,
-    Close = 1,
-    Something(String) = 2,
+    Subscribe = 1,
+    Close = 2,
+    Something(String) = 3,
+    // Reply(String) = 4,
 }
 
 impl Message {
@@ -38,8 +40,9 @@ impl Message {
 
         match discriminant[0] {
             0 => Ok(Message::Quit),
-            1 => Ok(Message::Close),
-            2 => Ok(Message::Something(Self::read_payload(stream)?)),
+            1 => Ok(Message::Subscribe),
+            2 => Ok(Message::Close),
+            3 => Ok(Message::Something(Self::read_payload(stream)?)),
             _ => Err(Error::new(ErrorKind::InvalidInput, "")),
         }
     }
@@ -52,7 +55,6 @@ impl Message {
             }
         };
         data.insert(0, self.discriminant());
-        dbg!(&data);
         stream.write(&data)?;
         Ok(())
     }
