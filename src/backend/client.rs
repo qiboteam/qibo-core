@@ -2,7 +2,7 @@ use std::io::{self, Error, Result};
 use std::net::TcpStream;
 use std::process::Command;
 
-use crate::backend::message::Message;
+use crate::backend::message::FromClient;
 
 use super::address::Address;
 
@@ -45,36 +45,36 @@ impl Client {
     }
 
     pub fn subscribe(&self) -> Result<()> {
-        Message::Subscribe.write(&mut self.stream()?)?;
+        FromClient::Subscribe.write(&mut self.stream()?)?;
         Ok(())
     }
 
     pub fn execute(&self, circuit: &str) -> Result<String> {
         // TODO: hold the stream, and avoid reinitializing it if the connection is open
         let mut stream = self.stream()?;
-        Message::Something(circuit.to_owned()).write(&mut stream)?;
+        FromClient::Something(circuit.to_owned()).write(&mut stream)?;
 
-        // let msg = Message::read(&mut self.stream()?)?;
+        // let msg = FromClient::read(&mut self.stream()?)?;
         //
-        // if let Message::Something(msg) = msg {
+        // if let FromClient::Something(msg) = msg {
         //     Ok(msg)
         // } else {
         //     Err(Error::new(ErrorKind::Unsupported, ""))
         // }
 
-        Message::Close.write(&mut stream)?;
+        FromClient::Close.write(&mut stream)?;
         Ok("".to_owned())
     }
 
     pub fn close(&self) -> io::Result<()> {
         println!("Closing connection to backend {}", self.address);
-        Message::Close.write(&mut self.stream()?)?;
+        FromClient::Close.write(&mut self.stream()?)?;
         Ok(())
     }
 
     pub fn quit(&self) -> io::Result<()> {
         println!("Quitting backend server {}", self.address);
-        Message::Quit.write(&mut self.stream()?)?;
+        FromClient::Quit.write(&mut self.stream()?)?;
         Ok(())
     }
 }

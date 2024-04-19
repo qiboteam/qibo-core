@@ -2,7 +2,7 @@ use std::io::{Error, ErrorKind, Result};
 use std::net::{TcpListener, TcpStream};
 
 use super::address::Address;
-use super::message::Message;
+use super::message::FromClient;
 
 #[derive(Debug)]
 pub struct Server {
@@ -39,28 +39,30 @@ impl Server {
     }
 
     fn reply(stream: &mut TcpStream) -> Result<()> {
-        Message::Something("".to_owned()).write(stream)?;
+        FromClient::Something("".to_owned()).write(stream)?;
         Ok(())
     }
 
     fn handle_connection(&mut self, mut stream: TcpStream) -> Result<()> {
         loop {
-            match Message::read(&mut stream)? {
-                Message::Subscribe => {
+            use FromClient::*;
+
+            match FromClient::read(&mut stream)? {
+                Subscribe => {
                     dbg!("subscribe");
                     self.clients += 1;
                     // TODO: reuse the connection on the client -> avoid breaking
                     break;
                 }
-                Message::Something(msg) => {
+                Something(msg) => {
                     dbg!(msg);
                     Self::reply(&mut stream)?;
                 }
-                Message::Close => {
+                Close => {
                     dbg!("close");
                     break;
                 }
-                Message::Quit => {
+                Quit => {
                     dbg!("quit");
                     self.clients -= 1;
                     break;
