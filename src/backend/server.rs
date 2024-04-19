@@ -38,8 +38,8 @@ impl Server {
         Ok(())
     }
 
-    fn reply(stream: &mut TcpStream) -> Result<()> {
-        FromServer::Reply("response from server".to_owned()).write(stream)?;
+    fn reply(stream: &mut TcpStream, text: &str) -> Result<()> {
+        FromServer::Reply(text.to_owned()).write(stream)?;
         Ok(())
     }
 
@@ -49,19 +49,15 @@ impl Server {
 
             match FromClient::read(&mut stream)? {
                 Subscribe => {
-                    dbg!("subscribe");
                     self.clients += 1;
                 }
                 Something(msg) => {
-                    dbg!(msg);
-                    Self::reply(&mut stream)?;
+                    Self::reply(&mut stream, &msg)?;
                 }
                 Close => {
-                    dbg!("close");
                     break;
                 }
                 Quit => {
-                    dbg!("quit");
                     self.clients -= 1;
                     break;
                 }

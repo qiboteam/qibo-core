@@ -20,10 +20,7 @@ impl Client {
         use std::{thread, time};
 
         let executable = format!("{PREFIX}-{name}");
-
         let address = Address::new().map_err(|_| Error::from(io::ErrorKind::Other))?;
-        println!("addr: {address}");
-        println!("exec: {executable}");
 
         Command::new(executable).arg(&address.to_string()).spawn()?;
         // TODO: drop the sleep, by waiting on some kind of activation signal
@@ -67,14 +64,12 @@ impl Client {
     }
 
     pub fn close(&mut self) -> io::Result<()> {
-        println!("Closing connection to backend {}", self.address);
         FromClient::Close.write(self.stream()?)?;
         self.stream = None;
         Ok(())
     }
 
     pub fn quit(&mut self) -> io::Result<()> {
-        println!("Quitting backend server {}", self.address);
         FromClient::Quit.write(self.stream()?)?;
         self.stream = None;
         Ok(())
