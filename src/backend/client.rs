@@ -78,9 +78,6 @@ impl Client {
 
 impl Drop for Client {
     fn drop(&mut self) {
-        // TODO: attempt quitting the server
-        // the server will hold a subscribers count, and just lower it by one
-        // it will actually quit when it will reach 0
         if let Err(_) = self.quit() {
             println!("Failed closing backend {}", self.address);
         }
