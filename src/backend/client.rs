@@ -2,9 +2,9 @@ use std::io::{self, Error, Result};
 use std::net::TcpStream;
 use std::process::Command;
 
-use crate::backend::message::{FromClient, FromServer};
-
 use super::address::Address;
+use super::message::{FromClient, FromServer};
+use crate::circuit::Circuit;
 
 const PREFIX: &str = "qibo-backend";
 
@@ -52,9 +52,9 @@ impl Client {
         Ok(())
     }
 
-    pub fn execute(&mut self, circuit: &str) -> Result<String> {
+    pub fn execute(&mut self, circuit: &Circuit) -> Result<String> {
         let mut stream = self.stream()?;
-        FromClient::Something(circuit.to_owned()).write(&mut stream)?;
+        FromClient::Something(serde_json::to_string(circuit)?).write(&mut stream)?;
 
         let msg = FromServer::read(&mut stream)?;
         let FromServer::Reply(msg) = msg;
