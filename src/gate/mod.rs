@@ -1,5 +1,7 @@
 use std::fmt::{self, Display};
 
+use serde::{Deserialize, Serialize};
+
 pub use self::more::More::{self, *};
 pub use self::one::One::{self, *};
 pub use self::two::Two::{self, *};
@@ -8,7 +10,8 @@ mod more;
 mod one;
 mod two;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[serde(untagged)]
 pub enum Gate {
     One(One),
     Two(Two),
