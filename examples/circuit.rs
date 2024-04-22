@@ -13,5 +13,10 @@ fn main() {
 
     println!("{}\n", c);
 
+    let serialized = serde_json::to_string(&c).unwrap();
+    println!("{}", serialized);
+    let deserialized: Circuit = serde_json::from_str(&serialized).unwrap();
+    println!("deserialized =\n{}\n", deserialized);
+
     println!("{:?}", c.elements(gid));
 }

@@ -10,8 +10,7 @@ fn main() {
     ];
 
     let serialized = serde_json::to_string(&gates).unwrap();
-    println!("{:?}", serialized);
-
+    println!("{}", serialized);
     let deserialized: Vec<Gate> = serde_json::from_str(&serialized).unwrap();
     println!("deserialized = {:?}", deserialized);
 }

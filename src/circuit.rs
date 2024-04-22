@@ -1,8 +1,10 @@
 use std::fmt::{self, Display};
 
+use serde::{Deserialize, Serialize};
+
 use crate::gate::Gate;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 struct Node {
     /// Gate ID
     gid: usize,
@@ -10,7 +12,7 @@ struct Node {
     element: usize,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 struct Edge(Option<Node>, Node);
 
 /// A discrete gate-based representation of a quantum computation.
@@ -21,7 +23,7 @@ struct Edge(Option<Node>, Node);
 /// across them. This is represented by recording the circuit ends, where it is possible to append
 /// further gates, including measurements. They identify the quantum elements (local subsystem)
 /// where the gates are acting on.
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Circuit {
     /// Set of gates
     gates: Vec<Gate>,
