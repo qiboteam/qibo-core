@@ -6,7 +6,7 @@ use std::ops::Range;
 pub(super) const LOCAL: &str = "localhost";
 const PORT_RANGE: Range<u16> = 10000..11000;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Address(u16);
 
 impl Address {

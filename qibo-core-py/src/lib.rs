@@ -1,5 +1,6 @@
 use pyo3::prelude::*;
 
+mod backend;
 mod circuit;
 mod gate;
 
@@ -12,4 +13,7 @@ mod qibo_core {
 
     #[pymodule_export]
     use circuit::circuit;
+
+    #[pymodule_export]
+    use backend::backend;
 }

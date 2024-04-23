@@ -47,7 +47,7 @@ impl Client {
         Ok(self.stream.as_mut().unwrap())
     }
 
-    pub fn subscribe(&mut self) -> Result<()> {
+    fn subscribe(&mut self) -> Result<()> {
         FromClient::Subscribe.write(self.stream()?)?;
         Ok(())
     }
