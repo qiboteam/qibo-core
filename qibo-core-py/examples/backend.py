@@ -1,5 +1,8 @@
 from qibo_core import backend, circuit, gate
 
+# To run this, you should install qibo-backend-simple in your PATH
+# cf. ../../examples/backend/qibo-backend-simple.rs,
+# or just run `just install-backends`, and add `target/backends` to your PATH
 backend = backend.Client.spawn("simple")
 
 X = gate.Gate.X
