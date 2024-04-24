@@ -36,5 +36,5 @@ serde_json = "1.0.116"
 serde_json = "1.0.116"
 
 [[example]]
-name = "qibo-backend-simple"
-path = "examples/backend/qibo-backend-simple.rs"
+name = "qibo-backend-echo"
+path = "examples/backend/qibo-backend-echo.rs"

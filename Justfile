@@ -5,12 +5,12 @@ backends := "target/backends"
   cp examples/backend/qibo-backend-netcat {{backends}}
 
 [private]
-@backend-simple:
-  cargo build --example qibo-backend-simple
-  cp ./target/debug/examples/qibo-backend-simple {{backends}}
+@backend-echo:
+  cargo build --example qibo-backend-echo
+  cp ./target/debug/examples/qibo-backend-echo {{backends}}
 
 
-install-backends: && backend-netcat backend-simple
+install-backends: && backend-netcat backend-echo
   @mkdir -p target/backends
 
 example-backend: install-backends
