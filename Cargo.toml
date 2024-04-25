@@ -9,7 +9,7 @@ categories = ["science"]
 edition = "2021"
 keywords = ["physics"]
 license = "GPL-3.0-or-later"
-repository = "https://github.com/AleCandido/partons"
+repository = "https://github.com/qiboteam/qibo-core"
 rust-version = "1.60.0"
 version = "0.0.1"
 
