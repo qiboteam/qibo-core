@@ -13,5 +13,5 @@ fn main() {
 
     println!("{}\n", c);
 
-    println!("{:?}", c.targets(gid));
+    println!("{:?}", c.elements(gid));
 }
