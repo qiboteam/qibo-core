@@ -15,7 +15,7 @@ struct Edge(Option<Node>, Node);
 
 /// A discrete gate-based representation of a quantum computation.
 ///
-/// The circuit is represented as an unstrtuctured set of gates, with their connectivity separately
+/// The circuit is represented as an unstructured set of gates, with their connectivity separately
 /// recorded by an adjacency list.
 /// Moreover, a circuit is not a random graph, but rather a set of wires, with possible links
 /// across them. This is represented by recording the circuit ends, where it is possible to append
