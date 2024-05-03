@@ -3,3 +3,4 @@ pub mod backend;
 pub mod circuit;
 pub mod gate;
 pub mod prelude;
+pub mod state;
