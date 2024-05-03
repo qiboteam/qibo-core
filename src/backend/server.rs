@@ -38,8 +38,8 @@ impl Server {
         Ok(())
     }
 
-    fn reply(stream: &mut TcpStream, text: &str) -> Result<()> {
-        FromServer::Reply(text.to_owned()).write(stream)?;
+    fn result(stream: &mut TcpStream, result: Vec<u8>) -> Result<()> {
+        FromServer::Result(result).write(stream)?;
         Ok(())
     }
 
@@ -51,8 +51,8 @@ impl Server {
                 Subscribe => {
                     self.clients += 1;
                 }
-                Something(msg) => {
-                    Self::reply(&mut stream, &msg)?;
+                Execute(msg) => {
+                    Self::result(&mut stream, msg)?;
                 }
                 Close => {
                     break;

@@ -3,8 +3,10 @@ use std::net::TcpStream;
 use std::process::Command;
 
 use super::address::Address;
+use super::execute;
 use super::message::{FromClient, FromServer};
 use crate::circuit::Circuit;
+use crate::state::State;
 
 const PREFIX: &str = "qibo-backend";
 
@@ -52,15 +54,18 @@ impl Client {
         Ok(())
     }
 
-    pub fn execute(&mut self, circuit: &Circuit) -> Result<String> {
+    pub fn execute<T>(
+        &mut self,
+        circuit: &Circuit,
+        state: Option<State<T>>,
+    ) -> Result<State<usize>> {
         let mut stream = self.stream()?;
-        FromClient::Something(serde_json::to_string(circuit)?).write(&mut stream)?;
+        FromClient::Execute(execute::request(circuit.clone(), state)).write(&mut stream)?;
 
-        let msg = FromServer::read(&mut stream)?;
-        let FromServer::Reply(msg) = msg;
+        let FromServer::Result(msg) = FromServer::read(&mut stream)?;
 
         self.close()?;
-        Ok(msg)
+        Ok(execute::response(msg))
     }
 
     pub fn close(&mut self) -> io::Result<()> {

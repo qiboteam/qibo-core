@@ -11,7 +11,7 @@ fn read_discriminant(stream: &mut TcpStream) -> Result<u8> {
     Ok(discriminant[0])
 }
 
-fn read_payload(stream: &mut TcpStream) -> Result<String> {
+fn read_payload(stream: &mut TcpStream) -> Result<Vec<u8>> {
     // TODO: this limits the size of the message to the usual 4GB
     // it should not be a limitation, since larger messages should be exchanged through
     // different channels - but it has to be documented
@@ -25,7 +25,7 @@ fn read_payload(stream: &mut TcpStream) -> Result<String> {
     message.resize(len, 0);
     stream.read_exact(&mut message)?;
 
-    String::from_utf8(message).map_err(|_| Error::new(ErrorKind::InvalidInput, ""))
+    Ok(message)
 }
 
 fn write_length(mut payload: Vec<u8>) -> Result<Vec<u8>> {
@@ -49,7 +49,7 @@ pub(super) enum FromClient {
     Quit = 0,
     Subscribe = 1,
     Close = 2,
-    Something(String) = 3,
+    Execute(Vec<u8>) = 3,
 }
 
 impl FromClient {
@@ -58,40 +58,42 @@ impl FromClient {
             0 => Ok(Self::Quit),
             1 => Ok(Self::Subscribe),
             2 => Ok(Self::Close),
-            3 => Ok(Self::Something(read_payload(stream)?)),
+            3 => Ok(Self::Execute(read_payload(stream)?)),
             _ => Err(Error::new(ErrorKind::InvalidInput, "")),
         }
     }
 
-    pub(super) fn write(&self, stream: &mut TcpStream) -> Result<()> {
-        let data = match &self {
-            Self::Something(payload) => write_length(payload.bytes().collect())?,
+    pub(super) fn write(self, stream: &mut TcpStream) -> Result<()> {
+        let discriminant = discriminant(&self);
+        let data = match self {
+            Self::Execute(payload) => write_length(payload)?,
             _ => {
                 vec![]
             }
         };
-        write_message(stream, discriminant(self), data)
+        write_message(stream, discriminant, data)
     }
 }
 
 #[derive(Debug)]
 #[repr(u8)]
 pub(super) enum FromServer {
-    Reply(String) = 0,
+    Result(Vec<u8>) = 0,
 }
 
 impl FromServer {
     pub(super) fn read(stream: &mut TcpStream) -> Result<Self> {
         match read_discriminant(stream)? {
-            0 => Ok(Self::Reply(read_payload(stream)?)),
+            0 => Ok(Self::Result(read_payload(stream)?)),
             _ => Err(Error::new(ErrorKind::InvalidInput, "")),
         }
     }
 
-    pub(super) fn write(&self, stream: &mut TcpStream) -> Result<()> {
-        let data = match &self {
-            Self::Reply(payload) => write_length(payload.bytes().collect())?,
+    pub(super) fn write(self, stream: &mut TcpStream) -> Result<()> {
+        let discriminant = discriminant(&self);
+        let data = match self {
+            Self::Result(payload) => write_length(payload)?,
         };
-        write_message(stream, discriminant(self), data)
+        write_message(stream, discriminant, data)
     }
 }

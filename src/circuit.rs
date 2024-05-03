@@ -23,7 +23,7 @@ struct Edge(Option<Node>, Node);
 /// across them. This is represented by recording the circuit ends, where it is possible to append
 /// further gates, including measurements. They identify the quantum elements (local subsystem)
 /// where the gates are acting on.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Circuit {
     /// Set of gates
     gates: Vec<Gate>,
