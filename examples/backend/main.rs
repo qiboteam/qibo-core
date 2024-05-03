@@ -10,7 +10,7 @@ fn main() -> Result<()> {
     c.add(H.into(), vec![2]);
     c.add(CNOT.into(), vec![3, 1]);
     println!("circuit:\n{c}");
-    let res = backend.execute(&c)?;
-    println!("response: {res}");
+    let res = backend.execute::<usize>(&c, None)?;
+    println!("response: {res:?}");
     Ok(())
 }

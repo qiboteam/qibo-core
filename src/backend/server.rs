@@ -1,6 +1,9 @@
 use std::io::{Error, ErrorKind, Result};
 use std::net::{TcpListener, TcpStream};
 
+use crate::circuit::Circuit;
+use crate::state::State;
+
 use super::address::Address;
 use super::message::{FromClient, FromServer};
 
@@ -8,6 +11,13 @@ use super::message::{FromClient, FromServer};
 pub struct Server {
     address: Address,
     clients: usize,
+}
+
+pub enum ToDo {
+    Execute(Circuit, Option<State<usize>>),
+    CloseConnection,
+    QuitServer,
+    Nothing,
 }
 
 impl Server {
@@ -20,49 +30,33 @@ impl Server {
         })
     }
 
-    pub fn listen(&mut self) -> Result<()> {
-        let listener = TcpListener::bind(&self.address.to_string())?;
-
-        for stream in listener.incoming() {
-            match stream {
-                Ok(stream) => self.handle_connection(stream)?,
-                Err(_) => {
-                    continue;
-                    // TODO: handle failure (at least log)
-                }
-            };
-            if self.clients == 0 {
-                break;
-            }
-        }
-        Ok(())
+    pub fn listen(&mut self) -> Result<TcpListener> {
+        TcpListener::bind(&self.address.to_string())
     }
 
-    fn result(stream: &mut TcpStream, result: Vec<u8>) -> Result<()> {
+    pub fn receive(&mut self, stream: &mut TcpStream) -> Result<ToDo> {
+        use FromClient::*;
+
+        Ok(match FromClient::read(stream)? {
+            Subscribe => {
+                self.clients += 1;
+                ToDo::Nothing
+            }
+            Execute(msg) => ToDo::Execute(Circuit::new(1), None),
+            Close => ToDo::CloseConnection,
+            Quit => {
+                self.clients -= 1;
+                if self.clients == 0 {
+                    ToDo::QuitServer
+                } else {
+                    ToDo::CloseConnection
+                }
+            }
+        })
+    }
+
+    pub fn send(stream: &mut TcpStream, result: Vec<u8>) -> Result<()> {
         FromServer::Result(result).write(stream)?;
-        Ok(())
-    }
-
-    fn handle_connection(&mut self, mut stream: TcpStream) -> Result<()> {
-        loop {
-            use FromClient::*;
-
-            match FromClient::read(&mut stream)? {
-                Subscribe => {
-                    self.clients += 1;
-                }
-                Execute(msg) => {
-                    Self::result(&mut stream, msg)?;
-                }
-                Close => {
-                    break;
-                }
-                Quit => {
-                    self.clients -= 1;
-                    break;
-                }
-            }
-        }
         Ok(())
     }
 }
