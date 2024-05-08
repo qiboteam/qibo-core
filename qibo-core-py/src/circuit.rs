@@ -21,6 +21,11 @@ pub mod circuit {
             self.0.add(gate.gate(), elements);
         }
 
+        #[getter]
+        fn n_elements(&self) -> usize {
+            self.0.n_elements()
+        }
+
         fn __str__(&self) -> String {
             format!("{}", self.0)
         }
