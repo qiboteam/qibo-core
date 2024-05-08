@@ -3,22 +3,19 @@ import math
 
 import numpy as np
 
-from qibo import __version__
 from qibo.backends import einsum_utils
-from qibo.backends.abstract import Backend
-from qibo.backends.npmatrices import NumpyMatrices
-from qibo.config import log, raise_error
-from qibo.result import CircuitResult, MeasurementOutcomes, QuantumState
+from .npmatrices import NumpyMatrices
+from .result import CircuitResult, MeasurementOutcomes, QuantumState
 
 
-class NumpyBackend(Backend):
+class NumpyBackend:
     def __init__(self):
         super().__init__()
         self.np = np
         self.name = "numpy"
         self.matrices = NumpyMatrices(self.dtype)
         self.tensor_types = np.ndarray
-        self.versions = {"qibo": __version__, "numpy": self.np.__version__}
+        self.versions = {"qibo": None, "numpy": self.np.__version__}
         self.numeric_types = (
             int,
             float,
@@ -103,7 +100,8 @@ class NumpyBackend(Backend):
         return state
 
     def matrix(self, gate):
-        """Convert a gate to its matrix representation in the computational basis."""
+        """Convert a gate to its matrix representation in the computational
+        basis."""
         name = gate.__class__.__name__
         _matrix = getattr(self.matrices, name)
         if callable(_matrix):
@@ -112,7 +110,8 @@ class NumpyBackend(Backend):
         return self.cast(_matrix, dtype=_matrix.dtype)
 
     def matrix_parametrized(self, gate):
-        """Convert a parametrized gate to its matrix representation in the computational basis."""
+        """Convert a parametrized gate to its matrix representation in the
+        computational basis."""
         name = gate.__class__.__name__
         matrix = getattr(self.matrices, name)(*gate.parameters)
         return self.cast(matrix, dtype=matrix.dtype)
@@ -376,7 +375,6 @@ class NumpyBackend(Backend):
         return state
 
     def execute_circuit(self, circuit, initial_state=None, nshots=1000):
-
         if isinstance(initial_state, type(circuit)):
             if not initial_state.density_matrix == circuit.density_matrix:
                 raise_error(
@@ -471,11 +469,13 @@ class NumpyBackend(Backend):
         )
 
     def execute_circuit_repeated(self, circuit, nshots, initial_state=None):
-        """
-        Execute the circuit `nshots` times to retrieve probabilities, frequencies
-        and samples. Note that this method is called only if a unitary channel
-        is present in the circuit (i.e. noisy simulation) and `density_matrix=False`, or
-        if some collapsing measurement is performed.
+        """Execute the circuit `nshots` times to retrieve probabilities,
+        frequencies and samples.
+
+        Note that this method is called only if a unitary channel is
+        present in the circuit (i.e. noisy simulation) and
+        `density_matrix=False`, or if some collapsing measurement is
+        performed.
         """
 
         if (
