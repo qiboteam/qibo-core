@@ -28,4 +28,11 @@ rust-version.workspace = true
 version.workspace = true
 
 [dependencies]
+cxx = "1.0"
 katexit = "0.1.4"
+
+[build-dependencies]
+cxx-build = "1.0"
+
+[lib]
+crate-type = ["staticlib"]
