@@ -32,7 +32,6 @@
 
               languages.python = {
                 enable = true;
-                poetry.enable = true;
                 venv.enable = true;
               };
               languages.rust = {
