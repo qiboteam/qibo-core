@@ -44,8 +44,8 @@ impl Circuit {
         self.gates.push(gate);
         // retrieve gate ID
         let gid = self.gates.len() - 1;
-        for (i, &el) in elements.iter().enumerate() {
-            let node = Node { gid, element: i };
+        for &el in elements.iter() {
+            let node = Node { gid, element: el };
             self.edges.push(Edge(self.ends[el], node));
             self.ends[el] = Some(node);
         }
@@ -65,36 +65,20 @@ impl Circuit {
         let mut gates = vec![];
         let mut elements = vec![];
         let mut gid = 0;
-        for edge in self.edges.iter() {
-            let node = (*edge).1;
+        for &edge in self.edges.iter() {
+            let node = edge.1;
             if node.gid == gid {
-                elements.push(self.element(node).unwrap());
+                elements.push(node.element);
             } else {
                 gates.push((self.gates[gid], elements));
                 gid = node.gid;
-                elements = vec![self.element(node).unwrap()];
+                elements = vec![node.element];
             }
+        }
+        if self.gates[gid].elements() > 1 {
+            gates.push((self.gates[gid], elements));
         }
         gates.into_iter()
-    }
-
-    /// Return the next node in the wire
-    ///
-    /// If the node is the last one in the wire `Ok(None)` is returned. If the node is not found,
-    /// `Err(())` is returned.
-    fn next(&self, node: Node) -> Result<Option<Node>, ()> {
-        for end in self.ends.iter() {
-            if *end == Some(node) {
-                return Ok(None);
-            }
-        }
-
-        for e in self.edges.iter() {
-            if e.0 == Some(node) {
-                return Ok(Some(e.1));
-            }
-        }
-        Err(())
     }
 
     pub fn wire(&self, element: usize) -> Vec<Gate> {
@@ -117,35 +101,14 @@ impl Circuit {
         (0..self.n_elements()).map(|i| self.wire(i)).collect()
     }
 
-    fn element(&self, node: Node) -> Option<usize> {
-        let mut current = Some(node);
-        while current != None {
-            match self.next(current.unwrap()) {
-                Ok(next @ Some(_)) => {
-                    current = next;
-                }
-                Ok(None) => {
-                    break;
-                }
-                Err(()) => {
-                    return None;
-                }
-            }
-        }
-        self.ends.iter().position(|x| *x == current)
-    }
-
-    fn nodes(&self, gid: usize) -> Vec<Node> {
-        (0..self.gates[gid].elements())
-            .map(|element| Node { gid, element })
-            .collect()
-    }
-
     /// Determine the elements the specified gate is acting on.
     pub fn elements(&self, gid: usize) -> Vec<usize> {
-        self.nodes(gid)
-            .into_iter()
-            .map(|n| self.element(n).expect("Dangling gate"))
+        self.edges
+            .iter()
+            .filter_map(|&edge| match edge.1.gid {
+                g if g == gid => Some(edge.1.element),
+                _ => None,
+            })
             .collect()
     }
 
