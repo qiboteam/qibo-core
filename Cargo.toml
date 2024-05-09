@@ -29,3 +29,4 @@ version.workspace = true
 
 [dependencies]
 katexit = "0.1.4"
+num = "0.4"
