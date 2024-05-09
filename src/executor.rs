@@ -53,9 +53,10 @@ fn apply_gate(state: &mut Vec<Complex<f64>>, gate: [Complex<f64>; 4], target: us
 }
 
 
-pub fn apply_gates(state: &mut Vec<Complex<f64>>, gates: Vec<Gate>, targets: Vec<usize>, nqubits: usize) {
-    for (gate, target) in gates.iter().zip(targets.iter()) {
-        let matrix = to_matrix(*gate);
-        apply_gate(state, matrix, *target, nqubits)
+pub fn execute_circuit(circuit: Circuit, state: &mut Vec<Complex<f64>>) {
+    for (gate, elements) in circuit.gates_with_elements() {
+        let matrix = to_matrix(gate);
+        // TODO: Multiqubit gates
+        apply_gate(state, matrix, elements[0], circuit.n_elements())
     }
 }

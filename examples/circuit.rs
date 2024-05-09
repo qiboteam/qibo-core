@@ -11,7 +11,11 @@ fn main() {
     c.add(Y.into(), vec![4]);
     c.add(RX(3.14).into(), vec![0]);
 
-    println!("{}\n", c);
-
+    println!("{}", c);
     println!("{:?}", c.elements(gid));
+
+    for (gate, elements) in c.gates_with_elements() {
+        println!("\n{:?}", gate);
+        println!("{:?}", elements);
+    }
 }

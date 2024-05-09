@@ -61,6 +61,23 @@ impl Circuit {
         Err(())
     }
 
+    pub fn gates_with_elements(&self) -> impl Iterator<Item = (Gate, Vec<usize>)> {
+        let mut gates = vec![];
+        let mut elements = vec![];
+        let mut gid = 0;
+        for edge in self.edges.iter() {
+            let node = (*edge).1;
+            if node.gid == gid {
+                elements.push(self.element(node).unwrap());
+            } else {
+                gates.push((self.gates[gid], elements));
+                gid = node.gid;
+                elements = vec![self.element(node).unwrap()];
+            }
+        }
+        gates.into_iter()
+    }
+
     /// Return the next node in the wire
     ///
     /// If the node is the last one in the wire `Ok(None)` is returned. If the node is not found,
