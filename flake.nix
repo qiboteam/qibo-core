@@ -28,7 +28,13 @@
 
           modules = [
             {
-              packages = with pkgs; [pre-commit maturin stdenv.cc.cc.lib];
+              packages = with pkgs; [
+                pre-commit
+                maturin
+                stdenv.cc.cc.lib
+                gdb
+                rust-cbindgen
+              ];
 
               languages.python = {
                 enable = true;
