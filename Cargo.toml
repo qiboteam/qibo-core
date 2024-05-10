@@ -1,5 +1,5 @@
 [workspace]
-members = ["qibo-core-py"]
+members = ["qibo-core-py", "qibo-core-cxx"]
 
 [workspace.package]
 authors = ["Alessandro Candido <candido.ale@gmail.com>"]
@@ -28,11 +28,4 @@ rust-version.workspace = true
 version.workspace = true
 
 [dependencies]
-cxx = "1.0"
 katexit = "0.1.4"
-
-[build-dependencies]
-cxx-build = "1.0"
-
-[lib]
-crate-type = ["staticlib"]

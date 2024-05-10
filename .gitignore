@@ -3,6 +3,3 @@ target/
 
 # Nix
 .devenv
-
-# CMake
-build/
