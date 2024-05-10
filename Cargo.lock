@@ -248,9 +248,16 @@ dependencies = [
 name = "qibo-core"
 version = "0.0.1"
 dependencies = [
+ "katexit",
+]
+
+[[package]]
+name = "qibo-core-cxx"
+version = "0.0.1"
+dependencies = [
  "cxx",
  "cxx-build",
- "katexit",
+ "qibo-core",
 ]
 
 [[package]]
