@@ -1,0 +1,21 @@
+language = "C"
+
+# Options for wrapping the contents of the header
+pragma_once = true
+include_version = true
+no_includes = true
+cpp_compat = true
+
+# Codegen Options
+style = "type"
+usize_is_size_t = true
+
+[export]
+prefix = "qibo_core_"
+
+[export.rename]
+"Circuit" = "circuit"
+
+[parse]
+parse_deps = true
+include = ["qibo-core"]
