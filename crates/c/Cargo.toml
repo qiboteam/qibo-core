@@ -14,3 +14,9 @@ version.workspace = true
 
 [dependencies]
 qibo-core = { version = "0.0.1", path = "../.." }
+
+[build-dependencies]
+cbindgen = "0.26.0"
+
+[features]
+capi = []
