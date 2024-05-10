@@ -39,6 +39,8 @@
                 channel = "stable";
                 components = ["rustc" "cargo" "clippy" "rustfmt"];
               };
+              languages.c.enable = true;
+              languages.cplusplus.enable = true;
             }
           ];
         };
