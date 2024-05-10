@@ -1,5 +1,5 @@
 [workspace]
-members = ["qibo-core-py", "qibo-core-cxx"]
+members = ["crates/*"]
 
 [workspace.package]
 authors = ["Alessandro Candido <candido.ale@gmail.com>"]

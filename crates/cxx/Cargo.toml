@@ -1,5 +1,5 @@
 [package]
-name = "qibo-core-py"
+name = "qibo-core-cxx"
 
 authors.workspace = true
 description.workspace = true
@@ -14,8 +14,11 @@ version.workspace = true
 
 [lib]
 name = "qibo_core"
-crate-type = ["cdylib"]
+crate-type = ["staticlib"]
 
 [dependencies]
-pyo3 = { version = "0.21.1", features = ["experimental-declarative-modules"] }
-qibo-core = { version = "0.0.1", path = ".." }
+cxx = "1.0"
+qibo-core = { version = "0.0.1", path = "../.." }
+
+[build-dependencies]
+cxx-build = "1.0"
