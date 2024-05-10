@@ -18,15 +18,6 @@
   } @ inputs: let
     forEachSystem = nixpkgs.lib.genAttrs (import systems);
   in {
-    packages = forEachSystem (system: {
-      default =
-        nixpkgs.legacyPackages.${system}.poetry2nix.mkPoetryApplication
-        {
-          projectDir = self;
-          preferWheels = true;
-        };
-    });
-
     devShells =
       forEachSystem
       (system: let
@@ -42,6 +33,7 @@
               languages.python = {
                 enable = true;
                 poetry.enable = true;
+                venv.enable = true;
               };
               languages.rust = {
                 enable = true;
