@@ -381,6 +381,7 @@ name = "qibo-core-c"
 version = "0.0.1"
 dependencies = [
  "cbindgen",
+ "cc",
  "qibo-core",
 ]
 

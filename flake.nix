@@ -33,7 +33,7 @@
                 maturin
                 stdenv.cc.cc.lib
                 gdb
-                rust-cbindgen
+                cargo-c
               ];
 
               languages.python = {
