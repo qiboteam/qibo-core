@@ -4,7 +4,7 @@ project(qibo-core)
 set(CMAKE_CXX_STANDARD 17)
 
 set(CARGO_MANIFEST ${CMAKE_SOURCE_DIR}/Cargo.toml)
-set(CARGO_TARGET_DIR ${CMAKE_SOURCE_DIR}/../target)
+set(CARGO_TARGET_DIR ${CMAKE_SOURCE_DIR}/../../target)
 
 set(QIBO_CORE_SOURCE_FILE ${CMAKE_SOURCE_DIR}/src/lib.rs)
 set(QIBO_CORE_BRIDGE_CPP ${CARGO_TARGET_DIR}/cxxbridge/qibo-core-cxx/src/lib.rs.cc)
