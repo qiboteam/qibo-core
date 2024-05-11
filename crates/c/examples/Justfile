@@ -1,0 +1,11 @@
+set positional-arguments
+
+target := "../../target/cexamples/"
+
+
+@cex_dir:
+	mkdir -p {{target}}
+
+@cexample source: cex_dir
+	cc examples/$1.c -o {{target}}/$1
+	{{target}}/$1
