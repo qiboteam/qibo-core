@@ -2,16 +2,48 @@ use std::fmt::{self, Display};
 
 use crate::gate::Gate;
 
+pub type NodeIndex = usize;
+pub type EdgeIndex = usize;
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 struct Node {
     /// Gate ID
     gid: usize,
+    /// Index
+    index: NodeIndex,
     /// Internal element
     element: usize,
+    /// Nodes dependence
+    parent_nodes: Vec<Option<NodeIndex>>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+struct EntanglingNode {
+    /// Gate
+    gid: usize,
+    /// Index
+    index: NodeIndex,
+    /// Control qubit
+    control: usize,
+    /// Internal element
+    element: usize,
+    /// Nodes dependence
+    parent_nodes: Vec<Option<NodeIndex>>,
 }
 
 #[derive(Debug, Clone, Copy)]
-struct Edge(Option<Node>, Node);
+struct Edge {
+    source: Option<Node>,
+    target: Node,
+    index: EdgeIndex,
+}
+
+struct QuantumComputationGraph {
+    /// nodes
+    nodes: Vec<Node>,
+    /// edges
+    edges: Vec<Edge>
+}
 
 /// A discrete gate-based representation of a quantum computation.
 ///
@@ -28,7 +60,7 @@ pub struct Circuit {
     /// Gates connectivity
     edges: Vec<Edge>,
     /// Current final gates of each wire
-    ends: Vec<Option<Node>>,
+    wires_ends: Vec<Option<Node>>,
 }
 
 impl Circuit {
