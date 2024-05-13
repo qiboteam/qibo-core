@@ -34,6 +34,8 @@
                 stdenv.cc.cc.lib
                 gdb
                 cargo-c
+                ninja
+                meson
               ];
 
               languages.python = {
