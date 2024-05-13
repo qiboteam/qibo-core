@@ -1,0 +1,1 @@
+executable('circuit', 'circuit.c')
