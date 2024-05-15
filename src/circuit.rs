@@ -6,7 +6,7 @@ pub type NodeIndex = usize;
 pub type EdgeIndex = usize;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-struct Node {
+struct SimpleNode {
     /// Gate ID
     gid: usize,
     /// Index
@@ -31,18 +31,87 @@ struct EntanglingNode {
     parent_nodes: Vec<Option<NodeIndex>>,
 }
 
+enum Node {
+    SimpleNode,
+    EntanglingNode,
+}
+
 #[derive(Debug, Clone, Copy)]
 struct Edge {
-    source: Option<Node>,
+    /// Source node
+    source: Node,
+    /// Target node
     target: Node,
+    /// Edge index
     index: EdgeIndex,
 }
 
-struct QuantumComputationGraph {
+pub struct QuantumComputationGraph {
     /// nodes
     nodes: Vec<Node>,
     /// edges
     edges: Vec<Edge>
+}
+
+impl QuantumComputationGraph {
+    
+    pub fn new() -> Self {
+	QuantumComputationGraph {
+	    nodes: vec![],
+	    edges: vec![],
+	}
+    }
+
+    pub fn add_simple_node(&mut self, gate: Gate, element: usize, parent_nodes: Option<&[NodeIndex]>) {
+	if parent_nodes.is_none() {
+	    let parent_nodes = [];
+	}
+	let new_node = Node::SimpleNode {
+	    gid: gate,
+	    index: self.nodes.len(),
+	    element: element,
+	    parent_nodes: parent_nodes,
+	};
+	self.nodes.push(new_node);
+	if parent_nodes.len() > 0 {
+	    self.add_edge(source=parent_nodes[0], target=new_node);
+	}
+    }
+
+    pub fn add_entangling_node(&mut self, gate: Gate, element: usize, control: usize, parent_nodes: Option<&[NodeIndex]>) {
+	if parent_nodes.is_none() {
+	    let parent_nodes = [];
+	}
+	let new_node = Node::EntanglingNode {
+	    gid: gate,
+	    index: self.nodes.len(),
+	    element: element,
+	    control: control,
+	    parent_nodes: parent_nodes,
+	};
+	self.nodes.push(new_node);
+	if parent_nodes.len() > 0 {
+	    for node in parent_nodes.iter() {
+		self.add_edge(source=node, target=new_node);
+	    }
+	}
+    }
+
+    pub fn add_node(&mut self, gate: Gate, element: usize, control: Option<usize>, parent_nodes: Option<&[NodeIndex]>) {
+	match gate {
+	    Gate::One => self.add_simple_node(gate=gate, element=element, parent_nodes=parent_nodes),
+	    Gate::Two => self.add_entangling_node(gate=gate, element=element, control=control, parent_nodes=parent_nodes),
+	}
+    }
+
+    pub fn add_edge(&mut self, source: Node, target: Node) {
+	let new_edge = Edge {
+	    source: source,
+	    target: target,
+	    index: self.edges.len(),
+	};
+	self.edges.push(new_edge);
+    }
 }
 
 /// A discrete gate-based representation of a quantum computation.
@@ -53,36 +122,32 @@ struct QuantumComputationGraph {
 /// across them. This is represented by recording the circuit ends, where it is possible to append
 /// further gates, including measurements. They identify the quantum elements (local subsystem)
 /// where the gates are acting on.
+
 #[derive(Debug)]
 pub struct Circuit {
-    /// Set of gates
-    gates: Vec<Gate>,
-    /// Gates connectivity
-    edges: Vec<Edge>,
-    /// Current final gates of each wire
-    wires_ends: Vec<Option<Node>>,
+    /// The computation graph
+    graph: QuantumComputationGraph,
+    /// Current last added node for each wire
+    wires_ends: Option<&[Node]>,
 }
 
 impl Circuit {
+    
     pub fn new(n_elements: usize) -> Self {
         Circuit {
-            gates: vec![],
-            edges: vec![],
-            ends: vec![None; n_elements],
+            graph: QuantumComputationGraph::new(),
+            wires_ends: &[Node; n_elements],
         }
     }
 
     pub fn add(&mut self, gate: Gate, elements: Vec<usize>) -> usize {
-        self.gates.push(gate);
-        // retrieve gate ID
-        let gid = self.gates.len() - 1;
-        for (i, &el) in elements.iter().enumerate() {
-            let node = Node { gid, element: i };
-            self.edges.push(Edge(self.ends[el], node));
-            self.ends[el] = Some(node);
-        }
-        gid
-    }
+	let element = elements[0];
+	let control = &elements[1..];
+	let parent_nodes = vec![];
+	for el in elements.iter() {
+	    parent_nodes.push(self.wires_ends[el]);
+	}
+	self.graph.add_node(gate=gate, element=element, control=control, parent_nodes=parent_nodes);
 
     fn previous(&self, node: Node) -> Result<Option<Node>, ()> {
         for e in self.edges.iter() {
