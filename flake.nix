@@ -28,7 +28,7 @@
 
           modules = [
             {
-              packages = with pkgs; [pre-commit maturin stdenv.cc.cc.lib gdb];
+              packages = with pkgs; [pre-commit maturin stdenv.cc.cc.lib];
 
               languages.python = {
                 enable = true;
