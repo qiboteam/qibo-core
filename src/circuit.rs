@@ -132,6 +132,15 @@ impl Circuit {
             .collect()
     }
 
+    /// List of (gate, targeted elements) in the order given by the user
+    pub fn queue(&self) -> (&Vec<Gate>, Vec<Vec<usize>>) {
+        let mut elements = vec![];
+        for gid in 0..self.gates.len() {
+            elements.push(self.elements(gid));
+        }
+        (&self.gates, elements)
+    }
+
     pub fn draw(&self) -> String {
         let mut wires: Vec<String> = (0..self.n_elements()).map(|i| format!("q{i}: ")).collect();
 

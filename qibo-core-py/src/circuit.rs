@@ -3,6 +3,7 @@ use qibo_core::prelude;
 
 use crate::gate::gate::Gate;
 
+
 #[pymodule]
 pub mod circuit {
     use super::*;
@@ -18,12 +19,22 @@ pub mod circuit {
         }
 
         fn add(&mut self, gate: Gate, elements: Vec<usize>) {
-            self.0.add(gate.gate(), elements);
+            self.0.add(gate.to_rust(), elements);
         }
 
         #[getter]
         fn n_elements(&self) -> usize {
             self.0.n_elements()
+        }
+
+        #[getter]
+        fn queue(&self) -> (Vec<Gate>, Vec<Vec<usize>>) {
+            let queue = self.0.queue();
+            let mut pygates = vec![];
+            for &gate in queue.0.iter() {
+                pygates.push(Gate::to_python(gate));
+            }
+            (pygates, queue.1)
         }
 
         fn __str__(&self) -> String {
