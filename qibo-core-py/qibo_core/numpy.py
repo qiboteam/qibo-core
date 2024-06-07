@@ -10,7 +10,16 @@ from .result import CircuitResult, MeasurementOutcomes, QuantumState
 
 class NumpyBackend:
     def __init__(self):
-        super().__init__()
+        self.platform = None
+
+        self.precision = "double"
+        self.dtype = "complex128"
+        
+        self.device = "/CPU:0"
+        self.nthreads = 1
+        self.supports_multigpu = False
+        self.oom_error = MemoryError
+
         self.np = np
         self.name = "numpy"
         self.matrices = NumpyMatrices(self.dtype)
@@ -102,14 +111,16 @@ class NumpyBackend:
     def matrix(self, gate):
         """Convert a gate to its matrix representation in the computational
         basis."""
-        name = gate.__class__.__name__
+        name = type(gate).__name__.replace("Gate_", "")
         _matrix = getattr(self.matrices, name)
-        if callable(_matrix):
+        if hasattr(gate, "angle"):
+            _matrix = _matrix(gate.angle)
+        elif callable(_matrix):
             _matrix = _matrix(2 ** len(gate.target_qubits))
-
         return self.cast(_matrix, dtype=_matrix.dtype)
 
     def matrix_parametrized(self, gate):
+        # TODO: Possibly deprecate
         """Convert a parametrized gate to its matrix representation in the
         computational basis."""
         name = gate.__class__.__name__
@@ -167,11 +178,12 @@ class NumpyBackend:
         part2 = self.np.concatenate([zeros, matrix], axis=0)
         return self.np.concatenate([part1, part2], axis=1)
 
-    def apply_gate(self, gate, state, nqubits):
+    def apply_gate(self, gate, targets, state, nqubits):
         state = self.cast(state)
         state = self.np.reshape(state, nqubits * (2,))
-        matrix = gate.matrix(self)
-        if gate.is_controlled_by:
+        matrix = self.matrix(gate)
+        #if gate.is_controlled_by:
+        if False:
             matrix = self.np.reshape(matrix, 2 * len(gate.target_qubits) * (2,))
             ncontrol = len(gate.control_qubits)
             nactive = nqubits - ncontrol
@@ -189,8 +201,9 @@ class NumpyBackend:
             # Put qubit indices back to their proper places
             state = self.np.transpose(state, einsum_utils.reverse_order(order))
         else:
-            matrix = self.np.reshape(matrix, 2 * len(gate.qubits) * (2,))
-            opstring = einsum_utils.apply_gate_string(gate.qubits, nqubits)
+            matrix = self.np.reshape(matrix, 2 * len(targets) * (2,))
+            # TODO: Flip of targets may not work for two-qubit non-controlled gates(?)
+            opstring = einsum_utils.apply_gate_string(targets[::-1], nqubits)
             state = self.np.einsum(opstring, state, matrix)
         return self.np.reshape(state, (2**nqubits,))
 
@@ -376,40 +389,41 @@ class NumpyBackend:
 
     def execute_circuit(self, circuit, initial_state=None, nshots=1000):
         if isinstance(initial_state, type(circuit)):
-            if not initial_state.density_matrix == circuit.density_matrix:
-                raise_error(
-                    ValueError,
-                    f"""Cannot set circuit with density_matrix {initial_state.density_matrix} as
-                      initial state for circuit with density_matrix {circuit.density_matrix}.""",
-                )
-            elif (
-                not initial_state.accelerators == circuit.accelerators
-            ):  # pragma: no cover
-                raise_error(
-                    ValueError,
-                    f"""Cannot set circuit with accelerators {initial_state.density_matrix} as
-                      initial state for circuit with accelerators {circuit.density_matrix}.""",
-                )
-            else:
-                return self.execute_circuit(initial_state + circuit, None, nshots)
+            #if not initial_state.density_matrix == circuit.density_matrix:
+            #    raise_error(
+            #        ValueError,
+            #        f"""Cannot set circuit with density_matrix {initial_state.density_matrix} as
+            #          initial state for circuit with density_matrix {circuit.density_matrix}.""",
+            #    )
+            #elif (
+            #    not initial_state.accelerators == circuit.accelerators
+            #):  # pragma: no cover
+            #    raise_error(
+            #        ValueError,
+            #        f"""Cannot set circuit with accelerators {initial_state.density_matrix} as
+            #          initial state for circuit with accelerators {circuit.density_matrix}.""",
+            #    )
+            #else:
+            return self.execute_circuit(initial_state + circuit, None, nshots)
         elif initial_state is not None:
             initial_state = self.cast(initial_state)
 
-        if circuit.repeated_execution:
-            if circuit.measurements or circuit.has_collapse:
-                return self.execute_circuit_repeated(circuit, nshots, initial_state)
-            else:
-                raise RuntimeError(
-                    "Attempting to perform noisy simulation with `density_matrix=False` and no Measurement gate in the Circuit. If you wish to retrieve the statistics of the outcomes please include measurements in the circuit, otherwise set `density_matrix=True` to recover the final state."
-                )
+        #if circuit.repeated_execution:
+        #    if circuit.measurements or circuit.has_collapse:
+        #        return self.execute_circuit_repeated(circuit, nshots, initial_state)
+        #    else:
+        #        raise RuntimeError(
+        #            "Attempting to perform noisy simulation with `density_matrix=False` and no Measurement gate in the Circuit. If you wish to retrieve the statistics of the outcomes please include measurements in the circuit, otherwise set `density_matrix=True` to recover the final state."
+        #        )
 
-        if circuit.accelerators:  # pragma: no cover
-            return self.execute_distributed_circuit(circuit, initial_state, nshots)
+        #if circuit.accelerators:  # pragma: no cover
+        #    return self.execute_distributed_circuit(circuit, initial_state, nshots)
 
         try:
-            nqubits = circuit.nqubits
+            nqubits = circuit.n_elements
 
-            if circuit.density_matrix:
+            #if circuit.density_matrix:
+            if False:
                 if initial_state is None:
                     state = self.zero_density_matrix(nqubits)
                 else:
@@ -426,30 +440,26 @@ class NumpyBackend:
                     # cast to proper complex type
                     state = self.cast(initial_state)
 
-                for gate in circuit.queue:
-                    state = gate.apply(self, state, nqubits)
+                for gate, targets in zip(*circuit.queue):
+                    # TODO: Handle measurements and ``CallbackGate``
+                    state = self.apply_gate(gate, targets, state, nqubits)
 
-            if circuit.has_unitary_channel:
+            #if circuit.has_unitary_channel:
+            if False:
                 # here we necessarily have `density_matrix=True`, otherwise
                 # execute_circuit_repeated would have been called
-                if circuit.measurements:
-                    circuit._final_state = CircuitResult(
+                if len(circuit.measurements) > 0:
+                    return CircuitResult(
                         state, circuit.measurements, backend=self, nshots=nshots
                     )
-                    return circuit._final_state
-                else:
-                    circuit._final_state = QuantumState(state, backend=self)
-                    return circuit._final_state
-
+                return QuantumState(state, backend=self)
+                    
             else:
-                if circuit.measurements:
-                    circuit._final_state = CircuitResult(
+                if len(circuit.measurements) > 0:
+                    return CircuitResult(
                         state, circuit.measurements, backend=self, nshots=nshots
                     )
-                    return circuit._final_state
-                else:
-                    circuit._final_state = QuantumState(state, backend=self)
-                    return circuit._final_state
+                return QuantumState(state, backend=self)
 
         except self.oom_error:
             raise_error(

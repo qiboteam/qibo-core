@@ -28,6 +28,11 @@ pub mod circuit {
         }
 
         #[getter]
+        fn measurements(&self) -> Vec<Gate> {
+            vec![]
+        }
+
+        #[getter]
         fn queue(&self) -> (Vec<Gate>, Vec<Vec<usize>>) {
             let queue = self.0.queue();
             let mut pygates = vec![];

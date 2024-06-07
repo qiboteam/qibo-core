@@ -1,4 +1,4 @@
-from qibo_core import Circuit, gates
+from qibo_core import Circuit, gates, NumpyBackend
 
 
 c = Circuit(5)
@@ -14,6 +14,8 @@ c.add(gates.CNOT(), [4, 1])
 c.add(gates.X(), [0])
 
 print(c)
+
+backend = NumpyBackend()
+result = backend.execute_circuit(c)
 print()
-for gate, targets in zip(*c.queue):
-    print(gate, targets)
+print(result)
