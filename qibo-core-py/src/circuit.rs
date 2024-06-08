@@ -9,22 +9,25 @@ pub mod circuit {
     use super::*;
 
     #[pyclass]
-    struct Circuit(prelude::Circuit, usize);
+    struct Circuit {
+        circuit: prelude::Circuit, 
+        iteration_index: usize // index for iterating circuit queue
+    }
 
     #[pymethods]
     impl Circuit {
         #[new]
         fn new(elements: usize) -> Self {
-            Self(prelude::Circuit::new(elements), 0)
+            Self { circuit: prelude::Circuit::new(elements), iteration_index: 0 }
         }
 
         fn add(&mut self, gate: Gate, elements: Vec<usize>) {
-            self.0.add(gate.to_rust(), elements);
+            self.circuit.add(gate.to_rust(), elements);
         }
 
         #[getter]
         fn n_elements(&self) -> usize {
-            self.0.n_elements()
+            self.circuit.n_elements()
         }
 
         #[getter]
@@ -33,16 +36,16 @@ pub mod circuit {
         }
 
         fn __iter__(mut slf: PyRefMut<Self>) -> PyRefMut<Self> {
-            slf.1 = 0;
+            slf.iteration_index = 0; // reset iteration index
             slf
         }
 
         fn __next__(mut slf: PyRefMut<Self>) -> Option<(Gate, Vec<usize>)> {
-            let gid = slf.1;
-            if gid < slf.0.n_gates() {
-                let gate = Gate::to_python(slf.0.gates(gid));
-                let targets = slf.0.elements(gid);
-                slf.1 += 1;
+            let gid = slf.iteration_index;
+            if gid < slf.circuit.n_gates() {
+                let gate = Gate::to_python(slf.circuit.gates(gid));
+                let targets = slf.circuit.elements(gid);
+                slf.iteration_index += 1;
                 Some((gate, targets))
             } else {
                 None
@@ -50,7 +53,7 @@ pub mod circuit {
         }
 
         fn __str__(&self) -> String {
-            format!("{}", self.0)
+            format!("{}", self.circuit)
         }
     }
 }
