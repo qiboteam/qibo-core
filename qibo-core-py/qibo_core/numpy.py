@@ -430,7 +430,7 @@ class NumpyBackend:
                     # cast to proper complex type
                     state = self.cast(initial_state)
 
-                for gate in circuit.queue:
+                for gate, targets in circuit:
                     state = gate.apply_density_matrix(self, state, nqubits)
 
             else:
@@ -440,7 +440,7 @@ class NumpyBackend:
                     # cast to proper complex type
                     state = self.cast(initial_state)
 
-                for gate, targets in zip(*circuit.queue):
+                for gate, targets in circuit:
                     # TODO: Handle measurements and ``CallbackGate``
                     state = self.apply_gate(gate, targets, state, nqubits)
 

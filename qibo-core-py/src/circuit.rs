@@ -9,13 +9,13 @@ pub mod circuit {
     use super::*;
 
     #[pyclass]
-    struct Circuit(prelude::Circuit);
+    struct Circuit(prelude::Circuit, usize);
 
     #[pymethods]
     impl Circuit {
         #[new]
         fn new(elements: usize) -> Self {
-            Self(prelude::Circuit::new(elements))
+            Self(prelude::Circuit::new(elements), 0)
         }
 
         fn add(&mut self, gate: Gate, elements: Vec<usize>) {
@@ -32,14 +32,21 @@ pub mod circuit {
             vec![]
         }
 
-        #[getter]
-        fn queue(&self) -> (Vec<Gate>, Vec<Vec<usize>>) {
-            let queue = self.0.queue();
-            let mut pygates = vec![];
-            for &gate in queue.0.iter() {
-                pygates.push(Gate::to_python(gate));
+        fn __iter__(mut slf: PyRefMut<Self>) -> PyRefMut<Self> {
+            slf.1 = 0;
+            slf
+        }
+
+        fn __next__(mut slf: PyRefMut<Self>) -> Option<(Gate, Vec<usize>)> {
+            let gid = slf.1;
+            if gid < slf.0.n_gates() {
+                let gate = Gate::to_python(slf.0.gates(gid));
+                let targets = slf.0.elements(gid);
+                slf.1 += 1;
+                Some((gate, targets))
+            } else {
+                None
             }
-            (pygates, queue.1)
         }
 
         fn __str__(&self) -> String {
