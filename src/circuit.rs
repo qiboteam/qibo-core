@@ -92,8 +92,14 @@ impl Circuit {
         wire.into_iter().rev().collect()
     }
 
+    // Total number of elements in the circuit
     pub fn n_elements(&self) -> usize {
         self.ends.len()
+    }
+
+    // Total number of gates in the circuit
+    pub fn n_gates(&self) -> usize {
+        self.gates.len()
     }
 
     pub fn wires(&self) -> Vec<Vec<Gate>> {
@@ -132,13 +138,9 @@ impl Circuit {
             .collect()
     }
 
-    /// List of (gate, targeted elements) in the order given by the user
-    pub fn queue(&self) -> (&Vec<Gate>, Vec<Vec<usize>>) {
-        let mut elements = vec![];
-        for gid in 0..self.gates.len() {
-            elements.push(self.elements(gid));
-        }
-        (&self.gates, elements)
+    /// Gate in given position
+    pub fn gates(&self, gid: usize) -> Gate {
+        self.gates[gid]
     }
 
     pub fn draw(&self) -> String {
