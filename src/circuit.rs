@@ -139,7 +139,7 @@ impl Circuit {
     }
 
     /// Gate in given position
-    pub fn gates(&self, gid: usize) -> Gate {
+    pub fn gate(&self, gid: usize) -> Gate {
         self.gates[gid]
     }
 
