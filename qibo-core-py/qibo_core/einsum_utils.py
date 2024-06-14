@@ -5,12 +5,12 @@ used by :meth:`qibo.backends.numpy.NumpyEngine.apply_gate`.
 """
 # FIXME: Einsum dance (https://github.com/qiboteam/qibo-core/issues/4)
 
-from qibo.config import EINSUM_CHARS, raise_error
+EINSUM_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 def prepare_strings(qubits, nqubits):
     if nqubits + len(qubits) > len(EINSUM_CHARS):  # pragma: no cover
-        raise_error(NotImplementedError, "Not enough einsum characters.")
+        raise NotImplementedError("Not enough einsum characters.")
 
     inp = list(EINSUM_CHARS[:nqubits])
     out = inp[:]
@@ -34,7 +34,7 @@ def apply_gate_string(qubits, nqubits):
 def apply_gate_density_matrix_string(qubits, nqubits):
     inp, out, trans, rest = prepare_strings(qubits, nqubits)
     if nqubits > len(rest):  # pragma: no cover
-        raise_error(NotImplementedError, "Not enough einsum characters.")
+        raise NotImplementedError("Not enough einsum characters.")
 
     trest = rest[:nqubits]
     left = f"{inp}{trest},{trans}->{out}{trest}"
@@ -45,7 +45,7 @@ def apply_gate_density_matrix_string(qubits, nqubits):
 def apply_gate_density_matrix_controlled_string(qubits, nqubits):
     inp, out, trans, rest = prepare_strings(qubits, nqubits)
     if nqubits > len(rest):  # pragma: no cover
-        raise_error(NotImplementedError, "Not enough einsum characters.")
+        raise NotImplementedError("Not enough einsum characters.")
 
     trest, c = rest[:nqubits], rest[nqubits]
     left = f"{c}{inp}{trest},{trans}->{c}{out}{trest}"
