@@ -1,6 +1,8 @@
 use std::fmt::{self, Display};
 
-#[derive(Debug, Clone, Copy)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum Two {
     CNOT,
     CU1(f64),

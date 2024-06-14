@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+port=$(echo "$1" | cut -d : -f 2)
+nc -l "$port" -k

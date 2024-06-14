@@ -1,9 +1,11 @@
 use std::fmt::{self, Display};
 
+use serde::{Deserialize, Serialize};
+
 use super::extract_name;
 
 #[cfg_attr(doc, katexit::katexit)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum One {
     /// The Hadamard gate.
     ///

@@ -30,6 +30,10 @@
             {
               packages = with pkgs; [pre-commit maturin stdenv.cc.cc.lib];
 
+              enterShell = ''
+                export PATH=$DEVENV_ROOT/target/backends:$PATH
+              '';
+
               languages.python = {
                 enable = true;
                 venv.enable = true;

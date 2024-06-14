@@ -8,7 +8,7 @@ pub mod circuit {
     use super::*;
 
     #[pyclass]
-    struct Circuit(prelude::Circuit);
+    pub(crate) struct Circuit(pub(crate) prelude::Circuit);
 
     #[pymethods]
     impl Circuit {
