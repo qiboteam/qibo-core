@@ -46,19 +46,17 @@ class NumpyBackend:
                 self.precision = precision
                 self.dtype = "complex128"
             else:
-                raise_error(ValueError, f"Unknown precision {precision}.")
+                raise ValueError(f"Unknown precision {precision}.")
             if self.matrices:
                 self.matrices = self.matrices.__class__(self.dtype)
 
     def set_device(self, device):
         if device != "/CPU:0":
-            raise_error(
-                ValueError, f"Device {device} is not available for {self} backend."
-            )
+            raise ValueError(f"Device {device} is not available for {self} backend.")
 
     def set_threads(self, nthreads):
         if nthreads > 1:
-            raise_error(ValueError, "numpy does not support more than one thread.")
+            raise ValueError("numpy does not support more than one thread.")
 
     def cast(self, x, dtype=None, copy=False):
         if dtype is None:
@@ -156,19 +154,14 @@ class NumpyBackend:
 
     def control_matrix(self, gate):
         if len(gate.control_qubits) > 1:
-            raise_error(
-                NotImplementedError,
-                "Cannot calculate controlled "
-                "unitary for more than two "
-                "control qubits.",
-            )
+            raise NotImplementedError("Cannot calculate controlled "
+                                    "unitary for more than two "
+                                    "control qubits.")
         matrix = gate.matrix(self)
         shape = matrix.shape
         if shape != (2, 2):
-            raise_error(
-                ValueError,
-                "Cannot use ``control_unitary`` method on "
-                + f"gate matrix of shape {shape}.",
+            raise ValueError("Cannot use ``control_unitary`` method on "
+                f"gate matrix of shape {shape}."
             )
         zeros = self.np.zeros((2, 2), dtype=self.dtype)
         zeros = self.cast(zeros, dtype=zeros.dtype)
@@ -260,11 +253,10 @@ class NumpyBackend:
         state = self.np.reshape(state, 2 * nqubits * (2,))
         matrix = gate.matrix(self)
         if gate.is_controlled_by:  # pragma: no cover
-            raise_error(
-                NotImplementedError,
+            raise NotImplementedError(
                 "Gate density matrix half call is "
                 "not implemented for ``controlled_by``"
-                "gates.",
+                "gates."
             )
         else:
             matrix = self.np.reshape(matrix, 2 * len(gate.qubits) * (2,))
@@ -429,11 +421,10 @@ class NumpyBackend:
             return QuantumState(state, backend=self)
 
         except self.oom_error:
-            raise_error(
-                RuntimeError,
+            raise RuntimeError(
                 f"State does not fit in {self.device} memory."
                 "Please switch the execution device to a "
-                "different one using ``qibo.set_device``.",
+                "different one using ``qibo.set_device``."
             )
 
     def execute_circuits(
@@ -545,9 +536,7 @@ class NumpyBackend:
             return final_result
 
     def execute_distributed_circuit(self, circuit, initial_state=None, nshots=None):
-        raise_error(
-            NotImplementedError, f"{self} does not support distributed execution."
-        )
+        raise NotImplementedError(f"{self} does not support distributed execution.")
 
     def calculate_symbolic(
         self, state, nqubits, decimals=5, cutoff=1e-10, max_terms=20
@@ -754,10 +743,7 @@ class NumpyBackend:
     # TODO: remove this method
     def calculate_hamiltonian_state_product(self, matrix, state):
         if len(tuple(state.shape)) > 2:
-            raise_error(
-                ValueError,
-                f"Cannot multiply Hamiltonian with rank-{len(tuple(state.shape))} tensor.",
-            )
+            raise ValueError(f"Cannot multiply Hamiltonian with rank-{len(tuple(state.shape))} tensor.")
         return matrix @ state
 
     def assert_allclose(self, value, target, rtol=1e-7, atol=0.0):
