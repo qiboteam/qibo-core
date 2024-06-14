@@ -5,7 +5,6 @@ from typing import Optional, Union
 import numpy as np
 
 from qibo import __version__, backends, gates
-from qibo.config import raise_error
 from qibo.measurements import apply_bitflips, frequencies_to_binary
 
 
@@ -275,10 +274,7 @@ class MeasurementOutcomes:
             qubits = range(nqubits)
         else:
             if not set(qubits).issubset(self.measurement_gate.qubits):
-                raise_error(
-                    RuntimeError,
-                    f"Asking probabilities for qubits {qubits}, but only qubits {self.measurement_gate.qubits} were measured.",
-                )
+                raise RuntimeError("Asking probabilities for qubits {qubits}, but only qubits {self.measurement_gate.qubits} were measured.")
             qubits = [self.measurement_gate.qubits.index(q) for q in qubits]
 
         if self._probs is not None and not self.measurement_gate.has_bitflip_noise():
