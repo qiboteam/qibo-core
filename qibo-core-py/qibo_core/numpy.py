@@ -184,6 +184,7 @@ class NumpyBackend:
         matrix = self.matrix(gate)
         #if gate.is_controlled_by:
         if False:
+            # TODO: Implement ``controlled_by``
             matrix = self.np.reshape(matrix, 2 * len(gate.target_qubits) * (2,))
             ncontrol = len(gate.control_qubits)
             nactive = nqubits - ncontrol
@@ -387,43 +388,19 @@ class NumpyBackend:
         state = (1 - lam) * state + lam * identity
         return state
 
-    def execute_circuit(self, circuit, initial_state=None, nshots=1000):
+    def execute_circuit(self, circuit, initial_state=None, nshots=1000, density_matrix=False):
         if isinstance(initial_state, type(circuit)):
-            #if not initial_state.density_matrix == circuit.density_matrix:
-            #    raise_error(
-            #        ValueError,
-            #        f"""Cannot set circuit with density_matrix {initial_state.density_matrix} as
-            #          initial state for circuit with density_matrix {circuit.density_matrix}.""",
-            #    )
-            #elif (
-            #    not initial_state.accelerators == circuit.accelerators
-            #):  # pragma: no cover
-            #    raise_error(
-            #        ValueError,
-            #        f"""Cannot set circuit with accelerators {initial_state.density_matrix} as
-            #          initial state for circuit with accelerators {circuit.density_matrix}.""",
-            #    )
-            #else:
-            return self.execute_circuit(initial_state + circuit, None, nshots)
+            return self.execute_circuit(initial_state + circuit, None, nshots, density_matrix)
         elif initial_state is not None:
             initial_state = self.cast(initial_state)
 
         #if circuit.repeated_execution:
-        #    if circuit.measurements or circuit.has_collapse:
-        #        return self.execute_circuit_repeated(circuit, nshots, initial_state)
-        #    else:
-        #        raise RuntimeError(
-        #            "Attempting to perform noisy simulation with `density_matrix=False` and no Measurement gate in the Circuit. If you wish to retrieve the statistics of the outcomes please include measurements in the circuit, otherwise set `density_matrix=True` to recover the final state."
-        #        )
-
-        #if circuit.accelerators:  # pragma: no cover
-        #    return self.execute_distributed_circuit(circuit, initial_state, nshots)
+        #    return self.execute_circuit_repeated(circuit, nshots, initial_state)
 
         try:
             nqubits = circuit.n_elements
 
-            #if circuit.density_matrix:
-            if False:
+            if density_matrix:
                 if initial_state is None:
                     state = self.zero_density_matrix(nqubits)
                 else:
@@ -444,22 +421,12 @@ class NumpyBackend:
                     # TODO: Handle measurements and ``CallbackGate``
                     state = self.apply_gate(gate, targets, state, nqubits)
 
-            #if circuit.has_unitary_channel:
-            if False:
-                # here we necessarily have `density_matrix=True`, otherwise
-                # execute_circuit_repeated would have been called
-                if len(circuit.measurements) > 0:
-                    return CircuitResult(
-                        state, circuit.measurements, backend=self, nshots=nshots
-                    )
-                return QuantumState(state, backend=self)
-                    
-            else:
-                if len(circuit.measurements) > 0:
-                    return CircuitResult(
-                        state, circuit.measurements, backend=self, nshots=nshots
-                    )
-                return QuantumState(state, backend=self)
+            
+            if len(circuit.measurements) > 0:
+                return CircuitResult(
+                    state, circuit.measurements, backend=self, nshots=nshots
+                )
+            return QuantumState(state, backend=self)
 
         except self.oom_error:
             raise_error(
@@ -478,7 +445,7 @@ class NumpyBackend:
             circuits, initial_states, nshots, processes, backend=self
         )
 
-    def execute_circuit_repeated(self, circuit, nshots, initial_state=None):
+    def execute_circuit_repeated(self, circuit, nshots, initial_state=None, density_matrix=False):
         """Execute the circuit `nshots` times to retrieve probabilities,
         frequencies and samples.
 
@@ -487,11 +454,14 @@ class NumpyBackend:
         `density_matrix=False`, or if some collapsing measurement is
         performed.
         """
-
+        if len(circuit.measurements) == 0 and not circuit.has_collapse:
+            raise RuntimeError(
+                "Attempting to perform noisy simulation with `density_matrix=False` and no Measurement gate in the Circuit. If you wish to retrieve the statistics of the outcomes please include measurements in the circuit, otherwise set `density_matrix=True` to recover the final state."
+            )
         if (
             circuit.has_collapse
-            and not circuit.measurements
-            and not circuit.density_matrix
+            and len(circuit.measurements) == 0
+            and not density_matrix
         ):
             raise RuntimeError(
                 "The circuit contains only collapsing measurements (`collapse=True`) but `density_matrix=False`. Please set `density_matrix=True` to retrieve the final state after execution."
@@ -500,7 +470,7 @@ class NumpyBackend:
         results, final_states = [], []
         nqubits = circuit.nqubits
 
-        if not circuit.density_matrix:
+        if not density_matrix:
             samples = []
             target_qubits = [
                 measurement.target_qubits for measurement in circuit.measurements
@@ -508,7 +478,7 @@ class NumpyBackend:
             target_qubits = sum(target_qubits, tuple())
 
         for _ in range(nshots):
-            if circuit.density_matrix:
+            if density_matrix:
                 if initial_state is None:
                     state = self.zero_density_matrix(nqubits)
                 else:
@@ -533,7 +503,7 @@ class NumpyBackend:
                             gate.substitute_symbols()
                         state = gate.apply(self, state, nqubits)
 
-            if circuit.density_matrix:
+            if density_matrix:
                 final_states.append(state)
             if circuit.measurements:
                 result = CircuitResult(
@@ -541,12 +511,12 @@ class NumpyBackend:
                 )
                 sample = result.samples()[0]
                 results.append(sample)
-                if not circuit.density_matrix:
+                if not density_matrix:
                     samples.append("".join([str(int(s)) for s in sample]))
                 for gate in circuit.measurements:
                     gate.result.reset()
 
-        if circuit.density_matrix:  # this implies also it has_collapse
+        if density_matrix:  # this implies also it has_collapse
             assert circuit.has_collapse
             final_state = self.cast(np.mean(self.to_numpy(final_states), 0))
             if circuit.measurements:
