@@ -43,7 +43,7 @@ pub mod circuit {
         fn __next__(mut slf: PyRefMut<Self>) -> Option<(Gate, Vec<usize>)> {
             let gid = slf.iteration_index;
             if gid < slf.circuit.n_gates() {
-                let gate = Gate::to_python(slf.circuit.gates(gid));
+                let gate = Gate::to_python(slf.circuit.gate(gid));
                 let targets = slf.circuit.elements(gid);
                 slf.iteration_index += 1;
                 Some((gate, targets))
