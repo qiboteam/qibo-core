@@ -1,3 +1,4 @@
+use ::qibo_core::VERSION;
 use pyo3::prelude::*;
 
 mod circuit;
@@ -12,4 +13,10 @@ mod qibo_core {
 
     #[pymodule_export]
     use circuit::circuit;
+
+    #[pymodule_init]
+    fn init(m: &Bound<'_, PyModule>) -> PyResult<()> {
+        m.add("__version__", VERSION)?;
+        Ok(())
+    }
 }
