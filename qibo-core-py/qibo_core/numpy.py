@@ -3,7 +3,7 @@ import math
 
 import numpy as np
 
-from qibo.backends import einsum_utils
+from . import einsum_utils
 from .npmatrices import NumpyMatrices
 from .result import CircuitResult, MeasurementOutcomes, QuantumState
 
@@ -14,7 +14,7 @@ class NumpyBackend:
 
         self.precision = "double"
         self.dtype = "complex128"
-        
+
         self.device = "/CPU:0"
         self.nthreads = 1
         self.supports_multigpu = False
@@ -154,13 +154,16 @@ class NumpyBackend:
 
     def control_matrix(self, gate):
         if len(gate.control_qubits) > 1:
-            raise NotImplementedError("Cannot calculate controlled "
-                                    "unitary for more than two "
-                                    "control qubits.")
+            raise NotImplementedError(
+                "Cannot calculate controlled "
+                "unitary for more than two "
+                "control qubits."
+            )
         matrix = gate.matrix(self)
         shape = matrix.shape
         if shape != (2, 2):
-            raise ValueError("Cannot use ``control_unitary`` method on "
+            raise ValueError(
+                "Cannot use ``control_unitary`` method on "
                 f"gate matrix of shape {shape}."
             )
         zeros = self.np.zeros((2, 2), dtype=self.dtype)
@@ -175,7 +178,7 @@ class NumpyBackend:
         state = self.cast(state)
         state = self.np.reshape(state, nqubits * (2,))
         matrix = self.matrix(gate)
-        #if gate.is_controlled_by:
+        # if gate.is_controlled_by:
         if False:
             # TODO: Implement ``controlled_by``
             matrix = self.np.reshape(matrix, 2 * len(gate.target_qubits) * (2,))
@@ -380,13 +383,17 @@ class NumpyBackend:
         state = (1 - lam) * state + lam * identity
         return state
 
-    def execute_circuit(self, circuit, initial_state=None, nshots=1000, density_matrix=False):
+    def execute_circuit(
+        self, circuit, initial_state=None, nshots=1000, density_matrix=False
+    ):
         if isinstance(initial_state, type(circuit)):
-            return self.execute_circuit(initial_state + circuit, None, nshots, density_matrix)
+            return self.execute_circuit(
+                initial_state + circuit, None, nshots, density_matrix
+            )
         elif initial_state is not None:
             initial_state = self.cast(initial_state)
 
-        #if circuit.repeated_execution:
+        # if circuit.repeated_execution:
         #    return self.execute_circuit_repeated(circuit, nshots, initial_state)
 
         try:
@@ -413,7 +420,6 @@ class NumpyBackend:
                     # TODO: Handle measurements and ``CallbackGate``
                     state = self.apply_gate(gate, targets, state, nqubits)
 
-            
             if len(circuit.measurements) > 0:
                 return CircuitResult(
                     state, circuit.measurements, backend=self, nshots=nshots
@@ -436,7 +442,9 @@ class NumpyBackend:
             circuits, initial_states, nshots, processes, backend=self
         )
 
-    def execute_circuit_repeated(self, circuit, nshots, initial_state=None, density_matrix=False):
+    def execute_circuit_repeated(
+        self, circuit, nshots, initial_state=None, density_matrix=False
+    ):
         """Execute the circuit `nshots` times to retrieve probabilities,
         frequencies and samples.
 
@@ -743,7 +751,9 @@ class NumpyBackend:
     # TODO: remove this method
     def calculate_hamiltonian_state_product(self, matrix, state):
         if len(tuple(state.shape)) > 2:
-            raise ValueError(f"Cannot multiply Hamiltonian with rank-{len(tuple(state.shape))} tensor.")
+            raise ValueError(
+                f"Cannot multiply Hamiltonian with rank-{len(tuple(state.shape))} tensor."
+            )
         return matrix @ state
 
     def assert_allclose(self, value, target, rtol=1e-7, atol=0.0):
