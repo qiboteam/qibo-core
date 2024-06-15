@@ -4,7 +4,8 @@ from typing import Optional, Union
 
 import numpy as np
 
-from qibo import __version__, backends, gates
+from .qibo_core import __version__
+from qibo import backends, gates
 from qibo.measurements import apply_bitflips, frequencies_to_binary
 
 
@@ -38,7 +39,8 @@ class QuantumState:
         self._state = state
 
     def symbolic(self, decimals: int = 5, cutoff: float = 1e-10, max_terms: int = 20):
-        """Dirac notation representation of the state in the computational basis.
+        """Dirac notation representation of the state in the computational
+        basis.
 
         Args:
             decimals (int, optional): Number of decimals for the amplitudes.
@@ -107,7 +109,8 @@ class QuantumState:
         return self.symbolic()
 
     def to_dict(self):
-        """Returns a dictonary containinig all the information needed to rebuild the ``QuantumState``"""
+        """Returns a dictonary containinig all the information needed to
+        rebuild the ``QuantumState``"""
         return {
             "state": self.state(numpy=True),
             "dtype": self.__class__.__name__,
@@ -264,7 +267,7 @@ class MeasurementOutcomes:
         return self._frequencies
 
     def probabilities(self, qubits: Optional[Union[list, set]] = None):
-        """Calculate the probabilities as frequencies / nshots
+        """Calculate the probabilities as frequencies / nshots.
 
         Returns:
             The array containing the probabilities of the measured qubits.
@@ -274,7 +277,9 @@ class MeasurementOutcomes:
             qubits = range(nqubits)
         else:
             if not set(qubits).issubset(self.measurement_gate.qubits):
-                raise RuntimeError("Asking probabilities for qubits {qubits}, but only qubits {self.measurement_gate.qubits} were measured.")
+                raise RuntimeError(
+                    "Asking probabilities for qubits {qubits}, but only qubits {self.measurement_gate.qubits} were measured."
+                )
             qubits = [self.measurement_gate.qubits.index(q) for q in qubits]
 
         if self._probs is not None and not self.measurement_gate.has_bitflip_noise():
@@ -394,7 +399,8 @@ class MeasurementOutcomes:
         return apply_bitflips(self, p0, p1)
 
     def expectation_from_samples(self, observable):
-        """Computes the real expectation value of a diagonal observable from frequencies.
+        """Computes the real expectation value of a diagonal observable from
+        frequencies.
 
         Args:
             observable (Hamiltonian/SymbolicHamiltonian): diagonal observable in the
@@ -408,7 +414,8 @@ class MeasurementOutcomes:
         return observable.expectation_from_samples(freq, qubit_map)
 
     def to_dict(self):
-        """Returns a dictonary containinig all the information needed to rebuild the :class:`qibo.result.MeasurementOutcomes`."""
+        """Returns a dictonary containinig all the information needed to
+        rebuild the :class:`qibo.result.MeasurementOutcomes`."""
         args = {
             "measurements": [m.to_json() for m in self.measurements],
             "probabilities": self._probs,
@@ -420,7 +427,8 @@ class MeasurementOutcomes:
         return args
 
     def dump(self, filename: str):
-        """Writes to file the :class:`qibo.result.MeasurementOutcomes` for future reloading.
+        """Writes to file the :class:`qibo.result.MeasurementOutcomes` for
+        future reloading.
 
         Args:
             filename (str): Path to the file to write to.
@@ -430,7 +438,8 @@ class MeasurementOutcomes:
 
     @classmethod
     def from_dict(cls, payload: dict):
-        """Builds a :class:`qibo.result.MeasurementOutcomes` object starting from a dictionary.
+        """Builds a :class:`qibo.result.MeasurementOutcomes` object starting
+        from a dictionary.
 
         Args:
             payload (dict): Dictionary containing all the information to load the :class:`qibo.result.MeasurementOutcomes` object.
@@ -457,7 +466,8 @@ class MeasurementOutcomes:
 
     @classmethod
     def load(cls, filename: str):
-        """Builds the :class:`qibo.result.MeasurementOutcomes` object stored in a file.
+        """Builds the :class:`qibo.result.MeasurementOutcomes` object stored in
+        a file.
 
         Args:
             filename (str): Path to the file containing the :class:`qibo.result.MeasurementOutcomes`.
@@ -470,7 +480,8 @@ class MeasurementOutcomes:
 
 
 class CircuitResult(QuantumState, MeasurementOutcomes):
-    """Object to store both the outcomes of measurements and the final state after circuit execution.
+    """Object to store both the outcomes of measurements and the final state
+    after circuit execution.
 
     Args:
         final_state (np.ndarray): Input quantum state as np.ndarray.
@@ -506,7 +517,8 @@ class CircuitResult(QuantumState, MeasurementOutcomes):
         return QuantumState.probabilities(self, qubits)
 
     def to_dict(self):
-        """Returns a dictonary containinig all the information needed to rebuild the ``CircuitResult``."""
+        """Returns a dictonary containinig all the information needed to
+        rebuild the ``CircuitResult``."""
         args = MeasurementOutcomes.to_dict(self)
         args.update(QuantumState.to_dict(self))
         args.update({"dtype": self.__class__.__name__})
