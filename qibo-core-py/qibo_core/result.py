@@ -4,7 +4,6 @@ from typing import Optional, Union
 
 import numpy as np
 
-from . import backends
 from .measurements import apply_bitflips, frequencies_to_binary
 from .qibo_core import __version__
 from .qibo_core import gate
@@ -34,6 +33,8 @@ class QuantumState:
     """
 
     def __init__(self, state, backend=None):
+        from . import backends
+
         self.backend = backends._check_backend(backend)
         self.density_matrix = len(state.shape) == 2
         self.nqubits = int(np.log2(state.shape[0]))
@@ -138,6 +139,8 @@ class QuantumState:
         Returns:
             :class:`qibo.result.QuantumState`: Quantum state object..
         """
+        from . import backends
+
         backend = backends.construct_backend("numpy")
         return cls(payload.get("state"), backend=backend)
 
@@ -448,6 +451,8 @@ class MeasurementOutcomes:
         Returns:
             A :class:`qibo.result.MeasurementOutcomes` object.
         """
+        from . import backends
+
         if payload["probabilities"] is not None and payload["samples"] is not None:
             warnings.warn(
                 "Both `probabilities` and `samples` found, discarding the `probabilities` and building out of the `samples`."
