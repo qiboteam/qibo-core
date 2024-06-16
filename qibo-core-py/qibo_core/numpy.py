@@ -6,6 +6,7 @@ import numpy as np
 from . import einsum_utils
 from .npmatrices import NumpyMatrices
 from .result import CircuitResult, MeasurementOutcomes, QuantumState
+from .config import SHOT_BATCH_SIZE
 
 
 class NumpyBackend:
@@ -330,7 +331,7 @@ class NumpyBackend:
         return self.np.reshape(state, shape)
 
     def reset_error_density_matrix(self, gate, state, nqubits):
-        from qibo.gates import X
+        from .qibo_core.gates import X
 
         state = self.cast(state)
         shape = state.shape
@@ -436,11 +437,8 @@ class NumpyBackend:
     def execute_circuits(
         self, circuits, initial_states=None, nshots=1000, processes=None
     ):
-        from qibo.parallel import parallel_circuits_execution
-
-        return parallel_circuits_execution(
-            circuits, initial_states, nshots, processes, backend=self
-        )
+        # TODO: restore from qibo
+        raise NotImplementedError
 
     def execute_circuit_repeated(
         self, circuit, nshots, initial_state=None, density_matrix=False
@@ -640,8 +638,6 @@ class NumpyBackend:
         return frequencies
 
     def sample_frequencies(self, probabilities, nshots):
-        from qibo.config import SHOT_BATCH_SIZE
-
         nprobs = probabilities / self.np.sum(probabilities)
         frequencies = self.np.zeros(len(nprobs), dtype=self.np.int64)
         for _ in range(nshots // SHOT_BATCH_SIZE):
