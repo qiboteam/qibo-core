@@ -3,10 +3,10 @@ import warnings
 from typing import Optional, Union
 
 import numpy as np
-
-from .qibo_core import __version__
 from qibo import backends, gates
-from qibo.measurements import apply_bitflips, frequencies_to_binary
+
+from .measurements import apply_bitflips, frequencies_to_binary
+from .qibo_core import __version__
 
 
 def load_result(filename: str):
