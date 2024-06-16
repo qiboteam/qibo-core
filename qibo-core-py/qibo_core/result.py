@@ -3,10 +3,13 @@ import warnings
 from typing import Optional, Union
 
 import numpy as np
-from qibo import backends, gates
 
+from . import backends
 from .measurements import apply_bitflips, frequencies_to_binary
 from .qibo_core import __version__
+from .qibo_core import gate
+
+gates = gate.Gate
 
 
 def load_result(filename: str):
@@ -31,9 +34,7 @@ class QuantumState:
     """
 
     def __init__(self, state, backend=None):
-        from qibo.backends import _check_backend
-
-        self.backend = _check_backend(backend)
+        self.backend = backends._check_backend(backend)
         self.density_matrix = len(state.shape) == 2
         self.nqubits = int(np.log2(state.shape[0]))
         self._state = state
@@ -447,14 +448,12 @@ class MeasurementOutcomes:
         Returns:
             A :class:`qibo.result.MeasurementOutcomes` object.
         """
-        from qibo.backends import construct_backend
-
         if payload["probabilities"] is not None and payload["samples"] is not None:
             warnings.warn(
                 "Both `probabilities` and `samples` found, discarding the `probabilities` and building out of the `samples`."
             )
             payload.pop("probabilities")
-        backend = construct_backend("numpy")
+        backend = backends.construct_backend("numpy")
         measurements = [gates.M.load(m) for m in payload.get("measurements")]
         return cls(
             measurements,
