@@ -389,6 +389,8 @@ dependencies = [
 name = "qibo-core-cxx"
 version = "0.0.1"
 dependencies = [
+ "cxx",
+ "cxx-build",
  "qibo-core",
 ]
 
