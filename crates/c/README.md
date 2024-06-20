@@ -40,3 +40,11 @@ and then run the compiled example with the following:
 # from inside `examples/`
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(realpath ../prefix/lib/) ./my-example
 ```
+
+## What's next
+
+We are working to provide reliable internal dependency, and a suitable package for
+third-party to depend on.
+
+However, for the time being, just ignore files related to other build systems (e.g.
+Meson, Buck2, ...), as they are fully experimental.
