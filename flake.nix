@@ -32,7 +32,7 @@
                 pre-commit
                 maturin
                 stdenv.cc.cc.lib
-                gdb
+                # gdb
                 cargo-c
                 ninja
                 meson
