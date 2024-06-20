@@ -1,0 +1,32 @@
+name: Test
+
+on:
+  push:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+      # - run: |
+      #     rustup update
+      #     rustup default
+      - name: Check
+        run: |
+          cargo check --verbose
+      - name: Compile
+        run: |
+          cargo build --verbose
+      - name: Lint
+        run: |
+          cargo clippy
+      - name: Test
+        run: |
+          cargo test --verbose
