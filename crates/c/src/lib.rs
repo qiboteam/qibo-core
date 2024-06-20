@@ -1,6 +1,7 @@
 //! Qibo core C bindings.
 
 use std::ffi::{c_char, CStr, CString};
+use std::slice;
 
 use qibo_core::prelude::*;
 
@@ -10,26 +11,39 @@ pub extern "C" fn qibo_core_circuit_new(n_elements: usize) -> Box<Circuit> {
 }
 
 #[no_mangle]
-pub extern "C" fn qibo_core_circuit_add(mut circuit: Box<Circuit>, gate: *const c_char) {
+pub extern "C" fn qibo_core_circuit_add(
+    circuit: *mut Circuit,
+    gate: *const c_char,
+    elements: *mut usize,
+    n_elements: usize,
+) {
+    let circuit = unsafe { &mut *circuit };
+    let elements = unsafe { slice::from_raw_parts_mut(elements, n_elements) }.to_vec();
+
     let gate = match (unsafe { CStr::from_ptr(gate) }).to_str().unwrap() {
         "H" => One::H.into(),
         "X" => One::X.into(),
         "Y" => One::Y.into(),
         "Z" => One::Z.into(),
+        "CNOT" => Two::CNOT.into(),
         _ => One::X.into(),
     };
-    println!("{gate:?}");
 
-    circuit.add(gate, vec![0]);
+    circuit.add(gate, elements);
 }
 
 #[no_mangle]
-pub extern "C" fn qibo_core_circuit_n_elements(circuit: Box<Circuit>) -> usize {
+pub extern "C" fn qibo_core_circuit_n_elements(circuit: *const Circuit) -> usize {
+    let circuit = unsafe { &*circuit };
+
     circuit.n_elements()
 }
 
 #[no_mangle]
-pub extern "C" fn qibo_core_circuit_draw(circuit: Box<Circuit>) -> *mut c_char {
+pub extern "C" fn qibo_core_circuit_draw(circuit: *const Circuit) -> *mut c_char {
+    let circuit = unsafe { &*circuit };
+
     let repr = circuit.draw();
+
     CString::new(repr).unwrap().into_raw()
 }
