@@ -39,6 +39,8 @@ and then run the compiled example with the following:
 ```sh
 # from inside `examples/`
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(realpath ../prefix/lib/) ./my-example
+# and on MacOS
+LD_DYLD_PATH=$LD_DYLD_PATH:$(realpath ../prefix/lib/) ./my-example
 ```
 
 ## What's next

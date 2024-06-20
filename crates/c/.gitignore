@@ -1,1 +1,4 @@
 prefix/
+
+# MacOS compilation files
+*.dSYM/
