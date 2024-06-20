@@ -1,7 +1,5 @@
 import collections
 
-import sympy
-
 
 def frequencies_to_binary(frequencies, nqubits):
     return collections.Counter(
@@ -20,45 +18,6 @@ def apply_bitflips(result, p0, p1=None):
         )
     noiseless_samples = result.samples()
     return result.backend.apply_bitflips(noiseless_samples, probs)
-
-
-class MeasurementSymbol(sympy.Symbol):
-    """``sympy.Symbol`` connected to measurement results.
-
-    Used by :class:`qibo.gates.measurements.M` with ``collapse=True`` to allow
-    controlling subsequent gates from the measurement results.
-    """
-
-    _counter = 0
-
-    def __new__(cls, *args, **kwargs):
-        name = f"m{cls._counter}"
-        cls._counter += 1
-        return super().__new__(cls=cls, name=name)
-
-    def __init__(self, index, result):
-        self.index = index
-        self.result = result
-
-    def __getstate__(self):
-        return {"index": self.index, "result": self.result, "name": self.name}
-
-    def __setstate__(self, data):
-        self.index = data.get("index")
-        self.result = data.get("result")
-        self.name = data.get("name")
-
-    def outcome(self):
-        return self.result.samples(binary=True)[-1][self.index]
-
-    def evaluate(self, expr):
-        """Substitutes the symbol's value in the given expression.
-
-        Args:
-            expr (sympy.Expr): Sympy expression that involves the current
-                measurement symbol.
-        """
-        return expr.subs(self, self.outcome())
 
 
 class MeasurementResult:
@@ -127,20 +86,6 @@ class MeasurementResult:
         """Remove all registered samples and frequencies."""
         self._samples = None
         self._frequencies = None
-
-    @property
-    def symbols(self):
-        """List of ``sympy.Symbols`` associated with the results of the
-        measurement.
-
-        These symbols are useful for conditioning parametrized gates on
-        measurement outcomes.
-        """
-        if self._symbols is None:
-            qubits = self.measurement_gate.target_qubits
-            self._symbols = [MeasurementSymbol(i, self) for i in range(len(qubits))]
-
-        return self._symbols
 
     def samples(self, binary=True, registers=False):
         """Returns raw measurement samples.
