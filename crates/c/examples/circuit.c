@@ -8,5 +8,6 @@ int main(int argc, char *argv[])
 	// qibo_core_circuit_add(c, "X");
 
 	printf("%s\n", qibo_core_circuit_draw(c));
+	printf("%s\n", qibo_core_circuit_draw(c));
 	return 0;
 }

@@ -20,11 +20,16 @@ pub extern "C" fn qibo_core_circuit_add(mut circuit: Box<Circuit>, gate: *const 
     };
     println!("{gate:?}");
 
-    (*circuit).add(gate, vec![0]);
+    circuit.add(gate, vec![0]);
+}
+
+#[no_mangle]
+pub extern "C" fn qibo_core_circuit_n_elements(circuit: Box<Circuit>) -> usize {
+    circuit.n_elements()
 }
 
 #[no_mangle]
 pub extern "C" fn qibo_core_circuit_draw(circuit: Box<Circuit>) -> *mut c_char {
-    let repr = (*circuit).draw();
+    let repr = circuit.draw();
     CString::new(repr).unwrap().into_raw()
 }
