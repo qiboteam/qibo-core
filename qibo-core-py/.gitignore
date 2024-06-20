@@ -1,0 +1,14 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Packaging
+env/
+dist/
+
+# Unit test / coverage reports
+htmlcov/
+coverage.xml
