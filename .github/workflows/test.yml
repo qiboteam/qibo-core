@@ -30,3 +30,12 @@ jobs:
       - name: Test
         run: |
           cargo test --verbose
+      - name: Examples
+        run: |
+          examples=$(
+            cargo metadata --no-deps --format-version 1 |
+            jq '.packages[1].targets.[] | select(.kind | contains(["example"])) | .name' -r
+          )
+          for ex in $examples; do
+            cargo run --example $ex
+          done
