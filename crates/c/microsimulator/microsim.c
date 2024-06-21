@@ -102,11 +102,7 @@ void execute_circuit(qibo_core_circuit *circuit, complex double *state) {
 		qibo_core_circuit_elements(circuit, gid, &elements, &n_gate_elements);
 
 		apply_controlled_gate(state, matrix, elements, n_controls, n_elements);
-		
-		printf("\n%ld %ld %s ", n_gate_elements, n_controls, gate);
-		for (size_t i = 0; i < n_gate_elements; i++) {
-			printf("%ld ", elements[i]);
-		}
+
 		qibo_core_circuit_free_elements(elements, n_gate_elements);
 	}
 	printf("\n");

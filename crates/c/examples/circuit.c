@@ -23,14 +23,13 @@ int main(int argc, char *argv[])
 
 	printf("%s\n", qibo_core_circuit_draw(c));
 	
-	// Initialize state vector
+	// Initialize 5-qubit state vector
     complex double state[32] = { 0 };
 	state[0] = 1;
 	
 	// Execute circuit
 	execute_circuit(c, state);
 
-	printf("\n");
 	// Print state vector
 	print_state(state, 32);
 	
