@@ -3,7 +3,7 @@
 #include "qibo_core_c.h"
 
 
-int main(int argc, char *argv[])
+int main(int, char *[])
 {
     qibo_core_circuit *c = qibo_core_circuit_new(5);
     qibo_core_circuit_add(c, "H", (size_t[]) {0}, 1);

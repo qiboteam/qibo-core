@@ -12,7 +12,7 @@ void print_state(complex double *state, const size_t size) {
 }
 
 
-int main(int argc, char *argv[])
+int main(int, char *[])
 {
     qibo_core_circuit *c = qibo_core_circuit_new(5);
     qibo_core_circuit_add(c, "H", (size_t[]) {0}, 1);
