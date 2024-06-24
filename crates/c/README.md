@@ -27,11 +27,11 @@ but you can change this value with any other valid path).
 
 Now move into the `examples/` folder in here.
 
-To compile an example, than use:
+To compile an example, just run:
 
 ```sh
 # from inside `examples/`
-PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$(realpath ../prefix/lib/pkgconfig) make my-example
+make my-example
 ```
 
 and then run the compiled example with the following:
@@ -41,6 +41,26 @@ and then run the compiled example with the following:
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(realpath ../prefix/lib/) ./my-example
 # and on MacOS
 LD_DYLD_PATH=$LD_DYLD_PATH:$(realpath ../prefix/lib/) ./my-example
+```
+
+#### `pkg-config`
+
+To use a custom prefix, change your `PKG_CONFIG_PATH` variable, appending the your
+prefix location:
+
+```sh
+# from inside `examples/`
+PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$(realpath ../prefix/lib/pkgconfig) make my-example
+```
+
+and remove the line exporting this variable in the `Makefile`.
+
+#### Justfile
+
+For people making use of [`just`](https://just.systems/), a `Justfile` is provided. Examples could be run using:
+
+```sh
+just example my-example
 ```
 
 ## What's next
