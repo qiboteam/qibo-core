@@ -6,16 +6,15 @@
 #include "qibo_core_c.h"
 #include "microsim.h"
 
-
-typedef struct {
+// normalization factor
+double const H = 1.0 / sqrt(2);
+// matrices implementing gates
+struct {
     complex double h[4];
     complex double x[4];
     complex double y[4];
     complex double z[4];
-} Matrices;
-
-double const H = 1.0 / sqrt(2);
-Matrices const MATRICES = {
+} const MATRICES = {
     {H, H, H, -H},
     {0, 1, 1, 0},
     {0, -I, I, 0},
@@ -36,10 +35,12 @@ complex double const* matrix(const char* gate) {
     return MATRICES.x;
 }
 
+// integer comparison, compatible with qsort
 int compare(const void* a, const void* b) {
     return (*(int*)a - *(int*)b);
 }
 
+// TODO: description missing
 size_t control_index(size_t const g, size_t const* qubits, size_t const nqubits) {
     size_t i = g;
     for (size_t j = 0; j < nqubits; j++) {
@@ -50,6 +51,7 @@ size_t control_index(size_t const g, size_t const* qubits, size_t const nqubits)
     return i;
 }
 
+// TODO: description missing
 void apply_controlled_gate(
     complex double* state,
     complex double const* gate,
@@ -89,6 +91,7 @@ size_t n_controls(const char* gate) {
     return 0;
 }
 
+// execute a qibo-core circuit, mutating the state in place
 void execute_circuit(qibo_core_circuit* circuit, complex double* state) {
     size_t const n_elements = qibo_core_circuit_n_elements(circuit);
     size_t const n_gates = qibo_core_circuit_n_gates(circuit);
