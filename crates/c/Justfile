@@ -1,0 +1,13 @@
+prefix := `realpath prefix`
+
+export LD_LIBRARY_PATH := env("LD_LIBRARY_PATH", "") + ":" + prefix + "/lib/"
+export LD_DYLD_PATH:= env("LD_DYLD_PATH", "") + ":" + prefix + "/lib/"
+
+install:
+	cargo cinstall --prefix {{prefix}}
+
+example-build name:
+	cd examples/ && make {{name}}
+
+example name: (example-build name)
+	cd examples/ && ./{{name}}
