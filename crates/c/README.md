@@ -55,6 +55,14 @@ PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$(realpath ../prefix/lib/pkgconfig) make my-exa
 
 and remove the line exporting this variable in the `Makefile`.
 
+#### Justfile
+
+For people making use of [`just`](https://just.systems/), a `Justfile` is provided. Examples could be run using:
+
+```sh
+just example my-example
+```
+
 ## What's next
 
 We are working to provide reliable internal dependency, and a suitable package for

@@ -13,7 +13,10 @@ libmicrosim.so: microsimulator/microsim.c microsimulator/microsim.h
 	$(CC) $(CFLAGS) -I$(PREFIX)/include $(LDFLAGS) microsimulator/microsim.c -shared -o libmicrosim.so
 	cp libmicrosim.so $(PREFIX)/lib/
 
+CMICROSIM=-I$(PREFIX)/include
+LDMICROSIM=-L$(PREFIX)/lib -lmicrosim
+
 execute: libmicrosim.so execute.c
-	$(CC) $(CFLAGS) -I$(PREFIX)/include $(LDFLAGS) -L$(PREFIX)/lib -lmicrosim execute.c -o execute
+	$(CC) $(CFLAGS) $(CMICROSIM) $(LDFLAGS) $(LDMICROSIM) execute.c -o execute
 
 all: $(EXECUTABLES)
