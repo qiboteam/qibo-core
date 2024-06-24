@@ -14,23 +14,33 @@ typedef struct {
     complex double z[4];
 } Matrices;
 
+double const H = 1.0 / sqrt(2);
+Matrices const MATRICES = {
+    {H, H, H, -H},
+    {0, 1, 1, 0},
+    {0, -I, I, 0},
+    {1, 0, 0, -1}
+};
 
-Matrices create() {
-    double const h = 1.0 / sqrt(2);
-    Matrices const m = {
-        {h, h, h, -h},
-        {0, 1, 1, 0},
-        {0, -I, I, 0},
-        {1, 0, 0, -1}
-    };
-    return m;
+// get matrix corresponding to the gate
+complex double const* matrix(const char* gate) {
+    if (strcmp(gate, "H") == 0) {
+        return MATRICES.h;
+    }
+    if (strcmp(gate, "Y") == 0) {
+        return MATRICES.y;
+    }
+    if (strcmp(gate, "Z") == 0) {
+        return MATRICES.z;
+    }
+    return MATRICES.x;
 }
 
-int compare(const void *a, const void *b) {
+int compare(const void* a, const void* b) {
     return (*(int*)a - *(int*)b);
 }
 
-size_t control_index(size_t const g, size_t const *qubits, size_t const nqubits) {
+size_t control_index(size_t const g, size_t const* qubits, size_t const nqubits) {
     size_t i = g;
     for (size_t j = 0; j < nqubits; j++) {
         size_t const n = qubits[j];
@@ -41,14 +51,14 @@ size_t control_index(size_t const g, size_t const *qubits, size_t const nqubits)
 }
 
 void apply_controlled_gate(
-    complex double *state, 
-    complex double const *gate, 
-    size_t const *qubits,
+    complex double* state,
+    complex double const* gate,
+    size_t const* qubits,
     size_t const ncontrols,
     size_t const nqubits
-) {
+    ) {
     size_t target = qubits[0];
-    
+
     size_t sorted_qubits[ncontrols + 1];
     memcpy(sorted_qubits, qubits, (ncontrols + 1) * sizeof(size_t));
     for (size_t i = 0; i < ncontrols + 1; i++) {
@@ -69,41 +79,31 @@ void apply_controlled_gate(
     }
 }
 
-void execute_circuit(qibo_core_circuit *circuit, complex double *state) {
-	Matrices gates = create();
+// calculate number of control qubits
+// maybe can be improved if we expose gate n_elements to C API
+// but this will change anyway when we implement ``controlled_by``
+size_t n_controls(const char* gate) {
+    if (strcmp(gate, "CNOT") == 0) {
+        return 1;
+    }
+    return 0;
+}
 
-	size_t const n_elements = qibo_core_circuit_n_elements(circuit);
-	size_t const n_gates = qibo_core_circuit_n_gates(circuit);
+void execute_circuit(qibo_core_circuit* circuit, complex double* state) {
+    size_t const n_elements = qibo_core_circuit_n_elements(circuit);
+    size_t const n_gates = qibo_core_circuit_n_gates(circuit);
 
-	for (size_t gid = 0; gid < n_gates; gid++) {
-		char const *gate = qibo_core_circuit_gate(circuit, gid);
-		complex double *matrix;
-        // get matrix corresponding to the gate
-		if (strcmp(gate, "H") == 0) {
-			matrix = gates.h;
-		} else if (strcmp(gate, "Y") == 0) {
-			matrix = gates.y;
-		} else if (strcmp(gate, "Z") == 0) {
-			matrix = gates.z;
-		} else {
-			matrix = gates.x;
-		}
-		
-        // calculate number of control qubits
-        // maybe can be improved if we expose gate n_elements to C API
-        // but this will change anyway when we implement ``controlled_by``
-		size_t n_controls = 0;
-		if (strcmp(gate, "CNOT") == 0) {
-			n_controls = 1;
-		}
+    for (size_t gid = 0; gid < n_gates; gid++) {
+        char const* gate = qibo_core_circuit_gate(circuit, gid);
 
-		size_t const *elements;
-		size_t n_gate_elements;
-		qibo_core_circuit_elements(circuit, gid, &elements, &n_gate_elements);
+        size_t const* elements;
+        size_t n_gate_elements;
+        qibo_core_circuit_elements(circuit, gid, &elements, &n_gate_elements);
 
-		apply_controlled_gate(state, matrix, elements, n_controls, n_elements);
+        complex double const* matrix_ = matrix(gate);
+        size_t n_controls_ = n_controls(gate);
+        apply_controlled_gate(state, matrix_, elements, n_controls_, n_elements);
 
-		qibo_core_circuit_free_elements(elements, n_gate_elements);
-	}
-	printf("\n");
+        qibo_core_circuit_free_elements(elements, n_gate_elements);
+    }
 }
