@@ -29,6 +29,8 @@ pub struct Circuit {
     edges: Vec<Edge>,
     /// Current final gates of each wire
     ends: Vec<Option<Node>>,
+    /// Number of elements per gate
+    gate_elements: Vec<usize>
 }
 
 impl Circuit {
@@ -37,6 +39,7 @@ impl Circuit {
             gates: vec![],
             edges: vec![],
             ends: vec![None; n_elements],
+            gate_elements: vec![],
         }
     }
 
@@ -44,6 +47,7 @@ impl Circuit {
         self.gates.push(gate);
         // retrieve gate ID
         let gid = self.gates.len() - 1;
+        self.gate_elements.push(elements.len());
         for (i, &el) in elements.iter().enumerate() {
             let node = Node { gid, element: i };
             self.edges.push(Edge(self.ends[el], node));
@@ -125,7 +129,7 @@ impl Circuit {
     }
 
     fn nodes(&self, gid: usize) -> Vec<Node> {
-        (0..self.gates[gid].elements())
+        (0..self.gate_elements[gid])
             .map(|element| Node { gid, element })
             .collect()
     }
@@ -147,31 +151,24 @@ impl Circuit {
         let mut wires: Vec<String> = (0..self.n_elements()).map(|i| format!("q{i}: ")).collect();
 
         for (gid, gate) in self.gates.iter().enumerate() {
-            match gate {
-                &Gate::One(_) => {
-                    wires[self.elements(gid)[0]] += &format!("{SEG}{gate}");
-                }
-                _ => {
-                    pad(&mut wires);
-                    let elements = self.elements(gid);
-                    let (up, down) = (
-                        elements.iter().min().unwrap(),
-                        elements.iter().max().unwrap(),
-                    );
-                    for w in 0..self.n_elements() {
-                        wires[w] += &(if elements[..gate.targets()].contains(&w) {
-                            format!("{SEG}{gate}")
-                        } else if w < *up || w > *down {
-                            format!("{SEG}{SEG}")
-                        } else if elements.iter().position(|x| *x == w) == None {
-                            format!("{SEG}|")
-                        } else {
-                            format!("{SEG}o")
-                        })
-                    }
-                    pad(&mut wires);
-                }
+            pad(&mut wires);
+            let elements = self.elements(gid);
+            let (up, down) = (
+                elements.iter().min().unwrap(),
+                elements.iter().max().unwrap(),
+            );
+            for w in 0..self.n_elements() {
+                wires[w] += &(if elements[..gate.targets()].contains(&w) {
+                    format!("{SEG}{gate}")
+                } else if w < *up || w > *down {
+                    format!("{SEG}{SEG}")
+                } else if elements.iter().position(|x| *x == w) == None {
+                    format!("{SEG}|")
+                } else {
+                    format!("{SEG}o")
+                })
             }
+            pad(&mut wires);
         }
         pad(&mut wires);
         wires.iter_mut().for_each(|w| w.push_str(SEG));
