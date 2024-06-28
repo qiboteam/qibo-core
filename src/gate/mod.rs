@@ -34,18 +34,10 @@ impl From<More> for Gate {
 }
 
 impl Gate {
-    pub fn elements(&self) -> usize {
-        match *self {
-            Self::One(_) => 1,
-            Self::Two(_) => 2,
-            Self::More(gate) => gate.elements(),
-        }
-    }
-
     pub fn targets(&self) -> usize {
         match *self {
             Self::One(_) => 1,
-            Self::Two(gate) => gate.targets(),
+            Self::Two(_) => 2,
             Self::More(gate) => gate.targets(),
         }
     }

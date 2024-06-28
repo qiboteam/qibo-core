@@ -69,9 +69,9 @@ def control_order(targets, controls, nqubits):
     return order, controlled_targets
 
 
-def control_order_density_matrix(gate, nqubits):
-    ncontrol = len(gate.control_qubits)
-    order, targets = control_order(gate, nqubits)
+def control_order_density_matrix(targets, controls, nqubits):
+    ncontrol = len(controls)
+    order, controlled_targets = control_order(targets, controls, nqubits)
     additional_order = [x + len(order) for x in order]
     order_dm = (
         order[:ncontrol]
@@ -79,7 +79,7 @@ def control_order_density_matrix(gate, nqubits):
         + order[ncontrol:]
         + list(additional_order[ncontrol:])
     )
-    return order_dm, targets
+    return order_dm, controlled_targets
 
 
 def reverse_order(order):
