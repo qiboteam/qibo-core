@@ -181,7 +181,6 @@ class NumpyBackend:
         matrix = self.matrix(gate)
         ntargets = gate.targets
         if len(elements) > ntargets:
-            # TODO: Implement ``controlled_by``
             targets, controls = elements[:ntargets], elements[ntargets:]
             matrix = self.np.reshape(matrix, 2 * len(targets) * (2,))
             nactive = nqubits - len(controls)
