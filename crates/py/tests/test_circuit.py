@@ -6,7 +6,6 @@ from qibo.backends import NumpyBackend as NumpyBackend_
 
 X = gate.Gate.X
 Y = gate.Gate.Y
-CNOT = gate.Gate.CNOT
 RX = gate.Gate.RX
 
 def qibo_circuit():
@@ -28,13 +27,13 @@ def qibo_core_circuit():
     c = circuit.Circuit(5)
     c.add(X(), [2])
     c.add(RX(3.0), [2])
-    c.add(CNOT(), [2, 0])
+    c.add(X(), [2, 0])
     c.add(X(), [1])
     c.add(X(), [3])
     c.add(Y(), [3])
     c.add(X(), [2])
     c.add(Y(), [4])
-    c.add(CNOT(), [1, 4])
+    c.add(X(), [1, 4])
     c.add(X(), [0])
     return c
 
@@ -42,6 +41,8 @@ def qibo_core_circuit():
 def test_draw():
     c = qibo_core_circuit()
     cq = qibo_circuit()
+    print(str(c))
+    print(cq.draw().replace("─", "-"))
     assert str(c) == cq.draw().replace("─", "-")
 
 

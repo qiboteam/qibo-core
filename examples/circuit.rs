@@ -5,9 +5,9 @@ fn main() {
     c.add(X.into(), vec![2]);
     c.add(Y.into(), vec![2, 0]);
     c.add(H.into(), vec![1, 4]);
-    let gid = c.add(CNOT.into(), vec![3, 1]);
+    let gid = c.add(X.into(), vec![3, 1]);
     c.add(H.into(), vec![3, 1, 4]);
-    c.add(CNOT.into(), vec![1, 4]);
+    c.add(X.into(), vec![1, 4]);
     c.add(Y.into(), vec![4]);
     c.add(RX(3.14).into(), vec![0]);
 

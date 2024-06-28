@@ -1,5 +1,5 @@
 use pyo3::prelude::*;
-use qibo_core::prelude::{self, More, One, Two};
+use qibo_core::prelude::{self, One, Two};
 
 #[pymodule]
 pub mod gate {
@@ -14,10 +14,8 @@ pub mod gate {
         Y {},
         Z {},
         RX { angle: f64 },
-        CNOT {},
-        CU1 { angle: f64 },
+        U1 { angle: f64 },
         SWAP {},
-        TOFFOLI {},
     }
 
     impl Gate {
@@ -29,10 +27,8 @@ pub mod gate {
                 &Self::Y {} => One::Y.into(),
                 &Self::Z {} => One::Z.into(),
                 &Self::RX { angle } => One::RX(*angle).into(),
-                &Self::CNOT {} => Two::CNOT.into(),
-                &Self::CU1 { angle } => Two::CU1(*angle).into(),
+                &Self::U1 { angle } => One::U1(*angle).into(),
                 &Self::SWAP {} => Two::SWAP.into(),
-                &Self::TOFFOLI {} => More::TOFFOLI.into(),
             }
         }
 
@@ -44,10 +40,8 @@ pub mod gate {
                 prelude::Gate::One(One::Y) => Self::Y {},
                 prelude::Gate::One(One::Z) => Self::Z {},
                 prelude::Gate::One(One::RX(angle)) => Self::RX { angle },
-                prelude::Gate::Two(Two::CNOT) => Self::CNOT {},
-                prelude::Gate::Two(Two::CU1(angle)) => Self::CU1 { angle },
+                prelude::Gate::One(One::U1(angle)) => Self::U1 { angle },
                 prelude::Gate::Two(Two::SWAP) => Self::SWAP {},
-                prelude::Gate::More(More::TOFFOLI) => Self::TOFFOLI {},
                 _ => todo!()
             }
         }

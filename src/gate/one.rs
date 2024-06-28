@@ -69,6 +69,7 @@ pub enum One {
     /// $$
     S,
     RX(f64),
+    U1(f64),
 }
 
 impl Display for One {
@@ -81,7 +82,8 @@ impl Display for One {
             | Self::SX
             | Self::SXDG
             | Self::S
-            | Self::RX(_)) => extract_name(g),
+            | Self::RX(_)
+            | Self::U1(_)) => extract_name(g),
         })
     }
 }
