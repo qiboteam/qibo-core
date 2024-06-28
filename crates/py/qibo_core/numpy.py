@@ -175,22 +175,22 @@ class NumpyBackend:
         part2 = self.np.concatenate([zeros, matrix], axis=0)
         return self.np.concatenate([part1, part2], axis=1)
 
-    def apply_gate(self, gate, targets, state, nqubits):
+    def apply_gate(self, gate, elements, state, nqubits):
         state = self.cast(state)
         state = self.np.reshape(state, nqubits * (2,))
         matrix = self.matrix(gate)
-        # if gate.is_controlled_by:
-        if False:
+        ntargets = gate.elements
+        if len(elements) > ntargets:
             # TODO: Implement ``controlled_by``
-            matrix = self.np.reshape(matrix, 2 * len(gate.target_qubits) * (2,))
-            ncontrol = len(gate.control_qubits)
-            nactive = nqubits - ncontrol
-            order, targets = einsum_utils.control_order(gate, nqubits)
+            targets, controls = elements[:ntargets], elements[ntargets:]
+            matrix = self.np.reshape(matrix, 2 * len(targets) * (2,))
+            nactive = nqubits - len(controls)
+            order, controlled_targets = einsum_utils.control_order(targets, controls, nqubits)
             state = self.np.transpose(state, order)
             # Apply `einsum` only to the part of the state where all controls
             # are active. This should be `state[-1]`
-            state = self.np.reshape(state, (2**ncontrol,) + nactive * (2,))
-            opstring = einsum_utils.apply_gate_string(targets, nactive)
+            state = self.np.reshape(state, (2**len(controls),) + nactive * (2,))
+            opstring = einsum_utils.apply_gate_string(controlled_targets, nactive)
             updates = self.np.einsum(opstring, state[-1], matrix)
             # Concatenate the updated part of the state `updates` with the
             # part of of the state that remained unaffected `state[:-1]`.
@@ -199,9 +199,8 @@ class NumpyBackend:
             # Put qubit indices back to their proper places
             state = self.np.transpose(state, einsum_utils.reverse_order(order))
         else:
-            matrix = self.np.reshape(matrix, 2 * len(targets) * (2,))
-            # TODO: Flip of targets may not work for two-qubit non-controlled gates(?)
-            opstring = einsum_utils.apply_gate_string(targets[::-1], nqubits)
+            matrix = self.np.reshape(matrix, 2 * len(elements) * (2,))
+            opstring = einsum_utils.apply_gate_string(elements, nqubits)
             state = self.np.einsum(opstring, state, matrix)
         return self.np.reshape(state, (2**nqubits,))
 
@@ -407,7 +406,7 @@ class NumpyBackend:
                     # cast to proper complex type
                     state = self.cast(initial_state)
 
-                for gate, targets in circuit:
+                for gate, elements in circuit:
                     state = gate.apply_density_matrix(self, state, nqubits)
 
             else:
@@ -417,9 +416,9 @@ class NumpyBackend:
                     # cast to proper complex type
                     state = self.cast(initial_state)
 
-                for gate, targets in circuit:
+                for gate, elements in circuit:
                     # TODO: Handle measurements and ``CallbackGate``
-                    state = self.apply_gate(gate, targets, state, nqubits)
+                    state = self.apply_gate(gate, elements, state, nqubits)
 
             if len(circuit.measurements) > 0:
                 return CircuitResult(

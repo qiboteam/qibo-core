@@ -53,20 +53,20 @@ def apply_gate_density_matrix_controlled_string(qubits, nqubits):
     return left, right
 
 
-def control_order(gate, nqubits):
+def control_order(targets, controls, nqubits):
     loop_start = 0
-    order = list(gate.control_qubits)
-    targets = list(gate.target_qubits)
-    for control in gate.control_qubits:
+    order = list(controls)
+    controlled_targets = list(targets)
+    for control in controls:
         for i in range(loop_start, control):
             order.append(i)
         loop_start = control + 1
-        for i, t in enumerate(gate.target_qubits):
+        for i, t in enumerate(targets):
             if t > control:
-                targets[i] -= 1
+                controlled_targets[i] -= 1
     for i in range(loop_start, nqubits):
         order.append(i)
-    return order, targets
+    return order, controlled_targets
 
 
 def control_order_density_matrix(gate, nqubits):

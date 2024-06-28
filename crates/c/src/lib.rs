@@ -24,7 +24,6 @@ pub extern "C" fn qibo_core_circuit_add(
         "X" => One::X.into(),
         "Y" => One::Y.into(),
         "Z" => One::Z.into(),
-        "CNOT" => Two::CNOT.into(),
         _ => One::X.into(),
     };
 
