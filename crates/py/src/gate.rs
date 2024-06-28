@@ -50,8 +50,8 @@ pub mod gate {
     #[pymethods]
     impl Gate {
         #[getter]
-        fn elements(&self) -> usize {
-            self.to_rust().elements()
+        fn targets(&self) -> usize {
+            self.to_rust().targets()
         }
     }
 }

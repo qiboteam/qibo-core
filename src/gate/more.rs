@@ -6,12 +6,6 @@ pub enum More {
 }
 
 impl More {
-    pub(super) fn elements(&self) -> usize {
-        match *self {
-            Self::TOFFOLI => 3,
-        }
-    }
-
     pub(super) fn targets(&self) -> usize {
         1
     }
