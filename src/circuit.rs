@@ -29,8 +29,6 @@ pub struct Circuit {
     edges: Vec<Edge>,
     /// Current final gates of each wire
     ends: Vec<Option<Node>>,
-    /// Number of elements per gate
-    gate_elements: Vec<usize>
 }
 
 impl Circuit {
@@ -39,7 +37,6 @@ impl Circuit {
             gates: vec![],
             edges: vec![],
             ends: vec![None; n_elements],
-            gate_elements: vec![],
         }
     }
 
@@ -47,7 +44,6 @@ impl Circuit {
         self.gates.push(gate);
         // retrieve gate ID
         let gid = self.gates.len() - 1;
-        self.gate_elements.push(elements.len());
         for (i, &el) in elements.iter().enumerate() {
             let node = Node { gid, element: i };
             self.edges.push(Edge(self.ends[el], node));
@@ -128,8 +124,13 @@ impl Circuit {
         self.ends.iter().position(|x| *x == current)
     }
 
+    /// Number of elements of a given gate
+    fn gate_elements(&self, gid: usize) -> usize {
+        self.edges.iter().filter(|e| e.1.gid == gid).count()
+    }
+
     fn nodes(&self, gid: usize) -> Vec<Node> {
-        (0..self.gate_elements[gid])
+        (0..self.gate_elements(gid))
             .map(|element| Node { gid, element })
             .collect()
     }
