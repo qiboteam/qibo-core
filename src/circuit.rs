@@ -150,7 +150,7 @@ impl Circuit {
 
     pub fn draw(&self) -> String {
         let mut wires: Vec<String> = (0..self.n_elements()).map(|i| format!("q{i}: ")).collect();
-    
+
         for (gid, gate) in self.gates.iter().enumerate() {
             let elements = self.elements(gid);
             if elements.len() == 1 {
@@ -177,7 +177,7 @@ impl Circuit {
         }
         pad(&mut wires);
         wires.iter_mut().for_each(|w| w.push_str(SEG));
-    
+
         wires.join("\n")
     }
 }
