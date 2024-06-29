@@ -41,8 +41,6 @@ def qibo_core_circuit():
 def test_draw():
     c = qibo_core_circuit()
     cq = qibo_circuit()
-    print(str(c))
-    print(cq.draw().replace("─", "-"))
     assert str(c) == cq.draw().replace("─", "-")
 
 
