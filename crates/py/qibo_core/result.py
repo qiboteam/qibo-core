@@ -157,6 +157,12 @@ class QuantumState:
         return cls.from_dict(payload)
 
 
+def frequencies_to_binary(frequencies, nqubits):
+    return collections.Counter(
+        {"{:b}".format(k).zfill(nqubits): v for k, v in frequencies.items()}
+    )
+
+
 class MeasurementOutcomes:
     """Object to store the outcomes of measurements after circuit execution.
 
@@ -173,9 +179,7 @@ class MeasurementOutcomes:
         self,
         samples: Optional[int] = None,
         frequencies: Optional[dict] = None,
-        backend=None,
     ):
-        self.backend = backend
         self._samples = samples
         self._frequencies = frequencies
 
@@ -183,7 +187,9 @@ class MeasurementOutcomes:
     def frequencies(self):
         """Frequencies of measured samples."""
         if self._frequencies is None:
-            self._frequencies = self.backend.calculate_frequencies(self.samples)
+            nelements = len(self.samples[0])
+            results, counts = np.unique(self.samples, axis=0, return_counts=True)
+            self._frequencies = {"".join(str(i) for i in r): c for r, c in zip(results.astype(int), counts)}
         return self._frequencies
 
     @property
@@ -191,12 +197,11 @@ class MeasurementOutcomes:
         """Raw measurement samples."""
         if self._samples is None:
             # generate samples that respect the existing frequencies
-            frequencies = self.frequencies(binary=False)
-            samples = np.concatenate(
-                [np.repeat(x, f) for x, f in frequencies.items()]
-            )
+            samples = []
+            for bitstring, counts in self.frequencies.items():
+                samples.extend(counts * [[int(b) for b in bitstring]])
             np.random.shuffle(samples)
-            self._samples = self.backend.cast(samples, "int32")
+            self._samples = np.array(samples, dtype="int32")
         return self._samples
 
     def to_dict(self):
@@ -238,11 +243,9 @@ class MeasurementOutcomes:
                 "Both `frequencies` and `samples` found, discarding the `frequencies` and building out of the `samples`."
             )
             payload.pop("frequencies")
-        backend = backends.construct_backend("numpy")
         return cls(
             samples=payload.get("samples"),
             frequencies=payload.get("frequencies"),
-            backend=backend,
         )
 
     @classmethod
@@ -258,12 +261,6 @@ class MeasurementOutcomes:
         """
         payload = np.load(filename, allow_pickle=True).item()
         return cls.from_dict(payload)
-
-
-def frequencies_to_binary(frequencies, nqubits):
-    return collections.Counter(
-        {"{:b}".format(k).zfill(nqubits): v for k, v in frequencies.items()}
-    )
 
 
 class CircuitResult(QuantumState):
@@ -296,7 +293,7 @@ class CircuitResult(QuantumState):
             probs = self.probabilities(self.elements)
             samples = self.backend.sample_shots(probs, self.nshots)
             samples = self.backend.samples_to_binary(samples, len(self.elements))
-            self.outcomes = MeasurementOutcomes(samples=samples, backend=self.backend)
+            self.outcomes = MeasurementOutcomes(samples=samples)
         return self.outcomes.samples
 
 
@@ -307,7 +304,7 @@ class CircuitResult(QuantumState):
             probs = self.probabilities(self.elements)
             frequencies = self.backend.sample_frequencies(probs, self.nshots)
             frequencies = frequencies_to_binary(frequencies, len(self.elements))
-            self.outcomes = MeasurementOutcomes(samples=samples, backend=self.backend)
+            self.outcomes = MeasurementOutcomes(frequencies=frequencies)
         return self.outcomes.frequencies
 
     def to_dict(self):

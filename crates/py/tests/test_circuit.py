@@ -7,6 +7,7 @@ from qibo.backends import NumpyBackend as NumpyBackend_
 X = gate.Gate.X
 Y = gate.Gate.Y
 RX = gate.Gate.RX
+M = gate.Gate.M
 
 def qibo_circuit():
     cq = qibo.Circuit(5)
@@ -50,3 +51,21 @@ def test_execute():
     result = NumpyBackend().execute_circuit(c)
     target_result = NumpyBackend_().execute_circuit(cq)
     np.testing.assert_allclose(result.state(), target_result.state())
+
+
+def test_measurement():
+    c = qibo_core_circuit()
+    c.add(M(), [1])
+    c.add(M(), [3])
+    c.add(M(), [4])
+
+    target_samples = np.zeros((100, 3))
+    target_samples[:, 2] = 1
+
+    result = NumpyBackend().execute_circuit(c, nshots=100)
+    np.testing.assert_allclose(result.samples, target_samples)
+    assert result.frequencies == {"001": 100}
+
+    result = NumpyBackend().execute_circuit(c, nshots=100)
+    assert result.frequencies == {"001": 100}
+    np.testing.assert_allclose(result.samples, target_samples)
