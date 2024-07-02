@@ -1,7 +1,7 @@
 use std::fmt::{self, Display};
 
 use crate::gate::Gate;
-use crate::prelude::One;
+use crate::gate::One;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 struct Node {
