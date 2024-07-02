@@ -7,19 +7,6 @@ def frequencies_to_binary(frequencies, nqubits):
     )
 
 
-def apply_bitflips(result, p0, p1=None):
-    gate = result.measurement_gate
-    if p1 is None:
-        probs = 2 * (gate._get_bitflip_tuple(gate.qubits, p0),)
-    else:
-        probs = (
-            gate._get_bitflip_tuple(gate.qubits, p0),
-            gate._get_bitflip_tuple(gate.qubits, p1),
-        )
-    noiseless_samples = result.samples()
-    return result.backend.apply_bitflips(noiseless_samples, probs)
-
-
 class MeasurementResult:
     """Data structure for holding measurement outcomes.
 
