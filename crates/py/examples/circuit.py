@@ -12,6 +12,9 @@ c.add(gates.X(), [2])
 c.add(gates.Y(), [4])
 c.add(gates.X(), [4, 1])
 c.add(gates.X(), [0])
+c.add(gates.M(), [1])
+c.add(gates.M(), [3])
+c.add(gates.M(), [4])
 
 print(c)
 

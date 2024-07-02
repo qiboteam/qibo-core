@@ -4,10 +4,12 @@ import math
 import numpy as np
 
 from . import einsum_utils
+from .qibo_core import gate
 from .npmatrices import NumpyMatrices
 from .result import CircuitResult, MeasurementOutcomes, QuantumState
 from .config import SHOT_BATCH_SIZE
 
+gates = gate.Gate
 
 class NumpyBackend:
     def __init__(self):
@@ -416,12 +418,12 @@ class NumpyBackend:
                     state = self.cast(initial_state)
 
                 for gate, elements in circuit:
-                    # TODO: Handle measurements and ``CallbackGate``
-                    state = self.apply_gate(gate, elements, state, nqubits)
+                    if not isinstance(gate, gates.M):
+                        state = self.apply_gate(gate, elements, state, nqubits)
 
-            if len(circuit.measurements) > 0:
+            if len(circuit.measured_elements) > 0:
                 return CircuitResult(
-                    state, circuit.measurements, backend=self, nshots=nshots
+                    state, circuit.measured_elements, nshots=nshots, backend=self,
                 )
             return QuantumState(state, backend=self)
 

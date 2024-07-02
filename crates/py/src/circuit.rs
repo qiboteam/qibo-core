@@ -28,8 +28,8 @@ pub mod circuit {
         }
 
         #[getter]
-        fn measurements(&self) -> Vec<Gate> {
-            vec![]
+        fn measured_elements(&self) -> Vec<usize> {
+            self.0.measured_elements()
         }
 
         fn __getitem__(&self, gid: usize) -> PyResult<(Gate, Vec<usize>)> {
