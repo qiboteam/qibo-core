@@ -145,7 +145,7 @@ impl Circuit {
 	let control = &elements[1..];
 	let parent_nodes = vec![];
 	for el in elements.iter() {
-	    parent_nodes.push(self.wires_ends[el]);
+	    parent_nodes.push(self.wires_ends[el].index);
 	}
 	self.graph.add_node(gate=gate, element=element, control=control, parent_nodes=parent_nodes);
 
