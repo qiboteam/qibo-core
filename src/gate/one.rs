@@ -68,6 +68,7 @@ pub enum One {
     /// \\end{pmatrix}
     /// $$
     S,
+    M,
     RX(f64),
     U1(f64),
 }
@@ -82,6 +83,7 @@ impl Display for One {
             | Self::SX
             | Self::SXDG
             | Self::S
+            | Self::M
             | Self::RX(_)
             | Self::U1(_)) => extract_name(g),
         })

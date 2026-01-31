@@ -1,6 +1,7 @@
 use std::fmt::{self, Display};
 
 use crate::gate::Gate;
+use crate::gate::One;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 struct Node {
@@ -146,6 +147,18 @@ impl Circuit {
     /// Gate in given position
     pub fn gate(&self, gid: usize) -> Gate {
         self.gates[gid]
+    }
+
+    pub fn measured_elements(&self) -> Vec<usize> {
+        self.gates.iter().enumerate()
+            .filter_map(|(gid, gate)| {
+                if let Gate::One(One::M) = gate {
+                    Some(self.elements(gid)[0])
+                } else {
+                    None
+                }
+            })
+            .collect()
     }
 
     pub fn draw(&self) -> String {
